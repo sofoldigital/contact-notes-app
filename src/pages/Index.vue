@@ -3,6 +3,7 @@
     <!-- PHONE NUMBER SEARCH -->
     <q-input
       v-model="phone"
+      v-if="!loading"
       label="Search Phone"
       flat
       style="width: 300px"
@@ -41,10 +42,10 @@
         v-bind="contact"
       ></ContactExpansion>
     </div>
-    <div v-if="filteredContacts.length == 0" class="text-center">
+    <div v-if="filteredContacts.length == 0 && !loading" class="text-center">
       Contact does not exist...
     </div>
-    <div class="text-center q-mt-md">
+    <div class="text-center q-mt-md" v-if="!loading">
       <q-btn color="primary">Create New Contact</q-btn>
     </div>
   </q-page>

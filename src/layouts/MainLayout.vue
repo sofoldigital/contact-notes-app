@@ -3,7 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title> Contact Notes App </q-toolbar-title>
-        <div class="text-right" v-if="user">
+        <div class="text-right" v-if="user && !$q.screen.lt.sm">
           Logged in as: <br />{{ user.email }}
         </div>
         <q-btn

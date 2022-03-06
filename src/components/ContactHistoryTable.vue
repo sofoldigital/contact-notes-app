@@ -9,6 +9,7 @@
     row-key="name"
     :loading="loading"
   >
+    <!-- TABLE STYLE SLOT -->
     <template v-slot:body="props">
       <q-tr :props="props">
         <q-td key="edit" :props="props">
@@ -27,7 +28,7 @@
         <q-td key="formattedDateOfContact" :props="props">
           <q-icon
             class="q-mr-sm"
-            :name="props.row.typeOfContact === 'call' ? 'phone' : 'email'"
+            :name="props.row.typeOfContact === 'Call' ? 'phone' : 'email'"
           ></q-icon>
           {{ props.row.formattedDateOfContact }}
         </q-td>
@@ -69,12 +70,70 @@
         </q-td>
       </q-tr>
     </template>
+
+    <!-- GRID STYLE SLOT -->
+    <template v-slot:item="props">
+      <div
+        class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
+        :style="props.selected ? 'transform: scale(0.95);' : ''"
+      >
+        <q-card>
+          <q-card-section
+            :class="
+              props.row.status == 'Actioned' ? 'bg-positive' : 'bg-warning'
+            "
+          >
+            <q-item>
+              <q-item-section avatar>
+                <q-icon
+                  class="q-mr-sm"
+                  :name="props.row.typeOfContact === 'Call' ? 'phone' : 'email'"
+                ></q-icon>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>
+                  {{ props.row.formattedDateOfContact }}
+                </q-item-label>
+                <q-item-label caption>
+                  {{ props.row.status }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  color="white"
+                  dense
+                  class="text-black"
+                  round
+                  icon="edit"
+                ></q-btn>
+              </q-item-section>
+            </q-item>
+            <q-space></q-space>
+          </q-card-section>
+          <q-separator />
+          <q-card-section>
+            <div class="q-mb-sm">
+              <q-item-label caption>Message</q-item-label>
+              {{ props.row.message }}
+            </div>
+            <div class="q-mb-sm" v-if="props.row.actionTaken">
+              <q-item-label caption>Action Taken</q-item-label>
+              {{ props.row.actionTaken }}
+            </div>
+            <div class="q-mb-sm" v-if="props.row.formattedDateActioned">
+              <q-item-label caption>Date Actioned</q-item-label>
+              {{ props.row.formattedDateActioned }}
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </template>
   </q-table>
 </template>
 
 <script>
 import { ref, computed } from "vue";
-import { date, useQuasar } from "quasar";
+import { date } from "quasar";
 
 export default {
   props: {
@@ -84,7 +143,6 @@ export default {
     },
   },
   setup(props, context) {
-    const $q = useQuasar;
     const formattedString = (val) => {
       const timestamp = new Date(val);
       return date.formatDate(timestamp, "DD-MMM-YY");

@@ -7,10 +7,9 @@
   >
     <template v-slot:header>
       <q-item dense class="full-width">
-        <q-item-section avatar>
+        <q-item-section avatar v-if="!$q.screen.lt.sm">
           <q-icon name="person"></q-icon>
         </q-item-section>
-
         <q-item-section>
           <q-item-label lines="1" class="text-weight-bold"
             >{{ contactName
@@ -20,8 +19,14 @@
             <span>{{ contactHistory.length }} interactions</span>
           </q-item-label>
         </q-item-section>
-
-        <q-item-section side class="text-right text-caption"
+        <q-chip color="warning" v-if="numberOfPending > 0">
+          {{ numberOfPending
+          }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Pending</span>
+        </q-chip>
+        <q-item-section
+          side
+          class="text-right text-caption"
+          v-if="!$q.screen.lt.sm"
           >Last update:<br />
           {{ formattedString(lastUpdate) }}
         </q-item-section>
@@ -40,6 +45,7 @@
 
 <script>
 import ContactHistoryTable from "./ContactHistoryTable.vue";
+import { computed } from "vue";
 import { date } from "quasar";
 export default {
   components: {
@@ -76,12 +82,19 @@ export default {
     },
   },
   setup(props, context) {
+    const numberOfPending = computed(() => {
+      const pendingActions = props.contactHistory.filter(
+        (x) => x.status !== "Actioned"
+      );
+      return pendingActions.length;
+    });
     const formattedString = (val) => {
       const timestamp = new Date(val);
       return date.formatDate(timestamp, "DD-MMM-YY");
     };
     return {
       formattedString,
+      numberOfPending,
     };
   },
 };
