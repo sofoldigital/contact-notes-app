@@ -6,8 +6,8 @@
     expand-icon-class="text-primary"
   >
     <template v-slot:header>
-      <q-item dense class="full-width">
-        <q-item-section avatar v-if="!$q.screen.lt.sm">
+      <q-item dense class="full-width q-pl-none">
+        <q-item-section avatar>
           <q-btn
             icon="edit"
             color="primary"

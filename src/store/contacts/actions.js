@@ -24,3 +24,13 @@ export async function createContact({ commit, state }, contact) {
     return { error: err.message };
   }
 }
+
+export async function editContact({ commit, state }, payload) {
+  const { contact, id } = payload;
+  try {
+    await db.collection("contacts").doc(id).update(contact, { merge: true });
+    return { error: null };
+  } catch (err) {
+    return { error: err.message };
+  }
+}

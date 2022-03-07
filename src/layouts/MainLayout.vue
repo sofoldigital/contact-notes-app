@@ -17,9 +17,18 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container class="bg-grey-3">
+    <q-page-container class="bg-grey-3" v-if="loaded">
       <router-view />
     </q-page-container>
+    <q-inner-loading
+      v-else
+      :showing="!loaded"
+      label-class="text-teal"
+      label-style="font-size: 1.1em"
+    >
+      <q-spinner-gears size="50px" color="primary" />
+      <p class="text-black q-mt-sm">Loading Data...</p>
+    </q-inner-loading>
   </q-layout>
 </template>
 
@@ -48,6 +57,19 @@ export default defineComponent({
     $store.dispatch("users/fetchProfiles");
     $store.dispatch("interactions/fetchInteractions");
 
+    const contactsLoading = computed(() => $store.state.contacts.loading);
+    const interactionsLoading = computed(
+      () => $store.state.interactions.loading
+    );
+    const usersLoading = computed(() => $store.state.users.loading);
+
+    const loaded = computed(
+      () =>
+        !usersLoading.value &&
+        !contactsLoading.value &&
+        !interactionsLoading.value
+    );
+
     const logOut = async () => {
       await $store.dispatch("users/logUserOut");
       $router.replace({ name: "Login" });
@@ -55,6 +77,7 @@ export default defineComponent({
     return {
       profile,
       logOut,
+      loaded,
     };
   },
 });

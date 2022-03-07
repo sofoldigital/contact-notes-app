@@ -73,6 +73,11 @@ export default {
       type: String,
       default: "",
     },
+
+    id: {
+      type: String,
+      default: null,
+    },
   },
   setup(props, context) {
     const $router = useRouter();
@@ -81,12 +86,16 @@ export default {
     const email = ref(props.originalEmail);
     const fax = ref(props.originalFax);
     const contactName = ref(props.originalName);
-    const id = ref(null);
+    const id = ref(props.id);
     const phoneExists = computed(() => {
-      console.log("original phone", props.originalPhone);
-      return $store.state.contacts.contacts.some(
-        (c) => c.phone === phone.value
-      );
+      if (!id.value) {
+        console.log("original phone", props.originalPhone);
+        return $store.state.contacts.contacts.some(
+          (c) => c.phone === phone.value
+        );
+      } else {
+        return false;
+      }
     });
     const $q = useQuasar();
     const onSubmit = async () => {

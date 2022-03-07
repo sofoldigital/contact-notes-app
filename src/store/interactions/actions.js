@@ -31,7 +31,7 @@ export async function editInteraction({ commit, state }, payload) {
     await db
       .collection("interactions")
       .doc(id)
-      .set(interaction, { merge: true });
+      .update(interaction, { merge: true });
     return { error: null };
   } catch (err) {
     return { error: err.message };

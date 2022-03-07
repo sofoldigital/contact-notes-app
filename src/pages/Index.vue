@@ -5,7 +5,6 @@
       <div class="col-12 col-sm-5">
         <q-input
           v-model="phone"
-          v-if="!contactsLoading && !interactionsLoading && !usersLoading"
           label="Phone Search"
           style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"
@@ -28,7 +27,6 @@
       <div class="col-12 col-sm-5">
         <q-input
           v-model="textSearch"
-          v-if="!contactsLoading && !interactionsLoading && !usersLoading"
           label="Message Search"
           style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"
@@ -49,44 +47,17 @@
         </q-input>
       </div>
     </div>
-    <q-inner-loading
-      :showing="contactsLoading || interactionsLoading || usersLoading"
-      label-class="text-teal"
-      label-style="font-size: 1.1em"
-    >
-      <q-spinner-gears size="50px" color="primary" />
-      <p class="text-black q-mt-sm">Loading Contacts...</p>
-    </q-inner-loading>
-    <div
-      v-if="
-        !contactsLoading &&
-        !interactionsLoading &&
-        !usersLoading &&
-        filteredContacts.length > 0
-      "
-      class="full-width q-mt-none"
-    >
+    <div v-if="filteredContacts.length > 0" class="full-width q-mt-none">
       <ContactExpansion
         v-for="contact in filteredContacts"
         :key="contact.id"
         v-bind="contact"
       ></ContactExpansion>
     </div>
-    <div
-      v-if="
-        filteredContacts.length == 0 &&
-        !contactsLoading &&
-        !interactionsLoading &&
-        !usersLoading
-      "
-      class="text-center"
-    >
+    <div v-if="filteredContacts.length == 0" class="text-center">
       Contact does not exist...
     </div>
-    <div
-      class="text-center q-mt-md"
-      v-if="!contactsLoading && !interactionsLoading && !usersLoading"
-    >
+    <div class="text-center q-mt-md">
       <q-btn
         color="primary"
         @click="$router.push({ name: 'Add Contact', query: { phone: phone } })"
@@ -123,14 +94,8 @@ export default defineComponent({
     if ($router.currentRoute.value.query.phone) {
       phone.value = $router.currentRoute.value.query.phone;
     }
-    const contactsLoading = computed(() => $store.state.contacts.loading);
 
-    const interactionsLoading = computed(
-      () => $store.state.interactions.loading
-    );
     const interactions = computed(() => $store.state.interactions.interactions);
-
-    const usersLoading = computed(() => $store.state.users.loading);
 
     const contacts = computed(() => {
       return $store.getters["contacts/getContacts"];
@@ -179,11 +144,8 @@ export default defineComponent({
     };
 
     return {
-      contactsLoading,
-      usersLoading,
       textSearch,
       exportData,
-      interactionsLoading,
       phone,
       filteredContacts,
     };
