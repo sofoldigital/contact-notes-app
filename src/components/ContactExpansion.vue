@@ -4,6 +4,7 @@
     class="shadow-1 overflow-hidden q-mb-md"
     style="border-radius: 30px"
     expand-icon-class="text-primary"
+    v-model="expanded"
   >
     <template v-slot:header>
       <q-item dense class="full-width q-pl-none">
@@ -59,13 +60,23 @@
 
 <script>
 import ContactHistoryTable from "./ContactHistoryTable.vue";
-import { computed } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { date } from "quasar";
 export default {
   components: {
     ContactHistoryTable,
   },
   props: {
+    phoneSearch: {
+      type: String,
+      default: "",
+    },
+
+    textSearch: {
+      type: String,
+      default: "",
+    },
+
     id: {
       type: String,
       required: true,
@@ -105,13 +116,21 @@ export default {
       const pendingActions = props.contactHistory.filter((x) => !x.actioned);
       return pendingActions.length;
     });
+    const expanded = ref(false);
     const formattedString = (val) => {
       const timestamp = new Date(val);
       return date.formatDate(timestamp, "DD-MMM-YY");
     };
+
+    watchEffect(() => {
+      if (props.phone === props.phoneSearch) {
+        expanded.value = true;
+      }
+    });
     return {
       formattedString,
       numberOfPending,
+      expanded,
     };
   },
 };

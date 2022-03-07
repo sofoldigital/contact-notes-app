@@ -52,6 +52,8 @@
         v-for="contact in filteredContacts"
         :key="contact.id"
         v-bind="contact"
+        :textSearch="textSearch"
+        :phoneSearch="phone"
       ></ContactExpansion>
     </div>
     <div v-if="filteredContacts.length == 0" class="text-center">
