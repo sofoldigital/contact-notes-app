@@ -1,9 +1,5 @@
-export function setUser(state, payload) {
-  state.user = payload;
-}
-
-export function setProfiles(state, payload) {
-  state.profiles = payload;
+export function setInteractions(state, payload) {
+  state.interactions = payload;
 }
 
 export function setLoading(state, payload) {

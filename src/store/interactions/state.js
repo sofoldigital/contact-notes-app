@@ -1,7 +1,6 @@
 export default function () {
   return {
-    user: null,
-    profiles: [],
+    interactions: [],
     loading: false,
     unsubscribe: null,
   };

@@ -3,8 +3,8 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title> Contact Notes App </q-toolbar-title>
-        <div class="text-right" v-if="user && !$q.screen.lt.sm">
-          Logged in as: <br />{{ user.email }}
+        <div class="text-right" v-if="profile && !$q.screen.lt.sm">
+          Logged in as: <br />{{ profile.displayName }}
         </div>
         <q-btn
           icon="exit_to_app"
@@ -34,14 +34,26 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const $router = useRouter();
-    const user = computed(() => $store.state.users.user);
+    const profile = computed(() => {
+      const profile = $store.state.users.profiles.find((profile) => {
+        return profile.id === $store.state.users.user.uid;
+      });
+      return profile;
+    });
+
+    $store.commit("contacts/setLoading", true);
+    $store.commit("users/setLoading", true);
+    $store.commit("interactions/setLoading", true);
+    $store.dispatch("contacts/fetchContacts");
+    $store.dispatch("users/fetchProfiles");
+    $store.dispatch("interactions/fetchInteractions");
 
     const logOut = async () => {
       await $store.dispatch("users/logUserOut");
       $router.replace({ name: "Login" });
     };
     return {
-      user,
+      profile,
       logOut,
     };
   },

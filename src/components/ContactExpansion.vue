@@ -13,7 +13,7 @@
         <q-item-section>
           <q-item-label lines="1" class="text-weight-bold"
             >{{ contactName
-            }}<span class="text-grey q-ml-sm">({{ id }})</span></q-item-label
+            }}<span class="text-grey q-ml-sm">({{ phone }})</span></q-item-label
           >
           <q-item-label caption>
             <span>{{ contactHistory.length }} interactions</span>
@@ -37,6 +37,7 @@
       <q-card-section class="q-pa-lg">
         <ContactHistoryTable
           :contactHistory="contactHistory"
+          :contactId="id"
         ></ContactHistoryTable>
       </q-card-section>
     </q-card>
@@ -53,6 +54,11 @@ export default {
   },
   props: {
     id: {
+      type: String,
+      required: true,
+    },
+
+    phone: {
       type: String,
       required: true,
     },
@@ -83,9 +89,7 @@ export default {
   },
   setup(props, context) {
     const numberOfPending = computed(() => {
-      const pendingActions = props.contactHistory.filter(
-        (x) => x.status !== "Actioned"
-      );
+      const pendingActions = props.contactHistory.filter((x) => !x.actioned);
       return pendingActions.length;
     });
     const formattedString = (val) => {

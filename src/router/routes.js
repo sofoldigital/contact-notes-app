@@ -11,6 +11,38 @@ const routes = [
           requiresAuth: true,
         },
       },
+      {
+        name: "Add Contact",
+        path: "/contacts/create",
+        component: () => import("pages/CreateContact.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        name: "Edit Contact",
+        path: "/contacts/edit/:id",
+        component: () => import("pages/CreateContact.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        name: "Add Interaction",
+        path: "/interactions/add/:id",
+        component: () => import("pages/AddInteraction.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        name: "Edit Interaction",
+        path: "/interactions/edit/:id",
+        component: () => import("pages/EditInteraction.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
     ],
   },
   {
