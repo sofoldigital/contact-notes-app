@@ -14,7 +14,20 @@
     <template v-slot:body="props">
       <q-tr :props="props">
         <q-td key="edit" :props="props">
-          <q-btn round size="sm" color="primary" icon="edit"></q-btn>
+          <q-btn
+            round
+            size="sm"
+            color="primary"
+            icon="edit"
+            @click="
+              $router.push({
+                name: 'Edit Interaction',
+                params: {
+                  id: props.row.id,
+                },
+              })
+            "
+          ></q-btn>
         </q-td>
         <q-td key="status" :props="props">
           <q-chip
@@ -123,6 +136,14 @@
                   class="text-black"
                   round
                   icon="edit"
+                  @click="
+                    $router.push({
+                      name: 'Edit Interaction',
+                      params: {
+                        id: props.row.id,
+                      },
+                    })
+                  "
                 ></q-btn>
               </q-item-section>
             </q-item>

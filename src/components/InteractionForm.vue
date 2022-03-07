@@ -40,7 +40,7 @@
     </div>
     <q-input
       filled
-      type="textarea"
+      autogrow
       v-model="message"
       label="Contact Message *"
       lazy-rules
@@ -98,14 +98,19 @@ export default {
       default: "",
     },
 
-    originalStatus: {
+    originalActioned: {
+      type: Boolean,
+      default: false,
+    },
+
+    originalActionTaken: {
       type: String,
       default: "",
     },
 
-    originalAction: {
+    id: {
       type: String,
-      default: "",
+      default: null,
     },
   },
   setup(props, context) {
@@ -117,11 +122,11 @@ export default {
 
     const message = ref(props.originalMessage);
 
-    const actionTaken = ref(props.originalAction);
+    const actionTaken = ref(props.originalActionTaken);
 
-    const actioned = ref(props.originalAction ? true : false);
+    const actioned = ref(props.originalActioned ? true : false);
 
-    const id = ref(null);
+    const id = ref(props.id ? true : false);
 
     const onSubmit = async () => {
       context.emit("onSubmit", {
@@ -131,7 +136,7 @@ export default {
           actionTaken: actionTaken.value,
           actioned: actioned.value,
         },
-        id: id.value,
+        contact: id,
       });
     };
 

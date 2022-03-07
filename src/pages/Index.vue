@@ -7,8 +7,7 @@
           v-model="phone"
           v-if="!contactsLoading && !interactionsLoading && !usersLoading"
           label="Phone Search"
-          filled
-          style="width: 250px"
+          style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"
           maxlength="15"
         >
@@ -31,10 +30,9 @@
           v-model="textSearch"
           v-if="!contactsLoading && !interactionsLoading && !usersLoading"
           label="Message Search"
-          filled
-          style="width: 250px"
+          style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"
-          maxlength="15"
+          maxlength="30"
         >
           <template v-slot:prepend>
             <q-icon name="sms" />
@@ -145,7 +143,6 @@ export default defineComponent({
       if (searchValue) {
         $store.state.interactions.interactions.filter((x) => {
           if (regexp.test(x.message)) {
-            console.log("pushing x contact", x);
             validContacts.push(x.contact);
           }
         });

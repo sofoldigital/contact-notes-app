@@ -2,6 +2,9 @@ const routes = [
   {
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      requiresAuth: true,
+    },
     children: [
       {
         name: "Home",
@@ -22,7 +25,7 @@ const routes = [
       {
         name: "Edit Contact",
         path: "/contacts/edit/:id",
-        component: () => import("pages/CreateContact.vue"),
+        component: () => import("pages/EditContact.vue"),
         meta: {
           requiresAuth: true,
         },

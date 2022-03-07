@@ -4,10 +4,15 @@
       <q-card-section class="text-h6 text-white text-center bg-primary">
         Update Interaction Details
       </q-card-section>
-      <q-card-section>
+      <q-card-section v-if="originalInteraction">
         <InteractionForm
           @onSubmit="updateInteraction"
           :loading="loading"
+          :originalType="originalInteraction.type"
+          :originalActioned="originalInteraction.actioned"
+          :originalMessage="originalInteraction.message"
+          :originalActionTaken="originalInteraction.actionTaken"
+          :id="originalInteraction.id"
         ></InteractionForm>
       </q-card-section>
     </q-card>
@@ -28,29 +33,39 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const $router = useRouter();
+    const originalInteraction = {
+      ...$store.state.interactions.interactions.find(
+        (i) => i.id === $router.currentRoute.value.params.id
+      ),
+    };
+
     const contact = computed(() =>
       $store.state.contacts.contacts.find(
         (c) => c.id === $router.currentRoute.value.params.id
       )
     );
+
     const uid = computed(() => $store.state.users.user.uid);
-    const profile = computed(() =>
-      $store.state.users.profiles.find((p) => p.id === uid.value)
-    );
     const loading = ref(false);
-    const addInteraction = async (ev) => {
+    const updateInteraction = async (ev) => {
       loading.value = true;
-      const { interaction } = ev;
+      const { interaction, contact } = ev;
       const currentDate = Date.now();
       const actioned = interaction.actioned;
-      interaction.contactDate = currentDate;
-      interaction.dateActioned = actioned ? currentDate : null;
-      interaction.actionedBy = actioned ? profile.value.id : "";
-      interaction.contact = contact.value.id;
-      const response = await $store.dispatch(
-        "interactions/addInteraction",
-        interaction
-      );
+      if (actioned !== originalInteraction.actioned) {
+        if (actioned) {
+          interaction.actionedBy = uid.value;
+          interaction.dateActioned = currentDate;
+        } else {
+          interaction.actionedBy = "";
+          interaction.actionTaken = "";
+          interaction.dateActioned = "";
+        }
+      }
+      const response = await $store.dispatch("interactions/editInteraction", {
+        interaction,
+        id: $router.currentRoute.value.params.id,
+      });
       if (!response.error) {
         $router.push({ name: "Home", query: { phone: contact.value.phone } });
       } else {
@@ -68,8 +83,9 @@ export default defineComponent({
       // loading.value = false;
     };
     return {
-      addInteraction,
+      updateInteraction,
       loading,
+      originalInteraction,
     };
   },
 });

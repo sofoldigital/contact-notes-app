@@ -8,7 +8,20 @@
     <template v-slot:header>
       <q-item dense class="full-width">
         <q-item-section avatar v-if="!$q.screen.lt.sm">
-          <q-icon name="person"></q-icon>
+          <q-btn
+            icon="edit"
+            color="primary"
+            round
+            dense
+            @click="
+              $router.push({
+                name: 'Edit Contact',
+                params: {
+                  id,
+                },
+              })
+            "
+          ></q-btn>
         </q-item-section>
         <q-item-section>
           <q-item-label lines="1" class="text-weight-bold"

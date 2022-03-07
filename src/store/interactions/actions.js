@@ -24,3 +24,16 @@ export async function addInteraction({ commit, state }, interaction) {
     return { error: err.message };
   }
 }
+
+export async function editInteraction({ commit, state }, payload) {
+  const { interaction, id } = payload;
+  try {
+    await db
+      .collection("interactions")
+      .doc(id)
+      .set(interaction, { merge: true });
+    return { error: null };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
