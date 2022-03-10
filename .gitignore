@@ -7,11 +7,10 @@ node_modules
 /dist
 
 # Firebase files
-.firebaserc
-firestore.indexes.json
-firestore.rules
-firebase.json
-
+.firebaserc*
+firestore.indexes.json*
+firestore.rules*
+firebase.json*
 
 # Cordova related directories and files
 /src-cordova/node_modules
