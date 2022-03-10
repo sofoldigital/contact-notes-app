@@ -2,7 +2,16 @@
   <q-page padding>
     <!-- PHONE NUMBER SEARCH -->
     <div class="row justify-around q-gutter-sm">
-      <div class="col-12 col-sm-5">
+      <div class="col-12 col-sm-3">
+        <q-select
+          v-model="sortContacts"
+          style="width: 200px; max-width: 95%"
+          class="q-mx-auto q-mb-md"
+          :options="['Recent Updates', 'Oldest', 'Pending']"
+          label="Sort by"
+        />
+      </div>
+      <div class="col-12 col-sm-4">
         <q-input
           v-model="phone"
           label="Phone"
@@ -25,7 +34,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-12 col-sm-5">
+      <div class="col-12 col-sm-4">
         <q-input
           v-model="textSearch"
           label="Search"
@@ -92,6 +101,8 @@ export default defineComponent({
 
     const phone = ref("");
 
+    const sortContacts = ref("Recent Updates");
+
     const textSearch = ref("");
 
     if ($router.currentRoute.value.query.phone) {
@@ -126,18 +137,87 @@ export default defineComponent({
       }
     });
 
-    const nameSearch = ref("");
-
     const filteredContacts = computed(() => {
-      const filteredIds = [...interactionsWithSearchText.value];
+      const sortedContacts = [...contactSorted.value];
+      contacts.value.forEach((o) => {
+        if (!sortedContacts.includes(o.id)) sortedContacts.push(o.id);
+      });
+      let result = [...contacts.value].sort((a, b) => {
+        return sortedContacts.indexOf(a.id) - sortedContacts.indexOf(b.id);
+      });
       const searchValue = phone.value;
       const regexp = new RegExp(searchValue, "i");
-      let filteredResults = contacts.value.filter((x) => {
+      let filteredResults = result.sort().filter((x) => {
         if (interactionsWithSearchText.value.some((id) => id === x.id)) {
           return regexp.test(x.phone);
         }
       });
       return filteredResults;
+    });
+
+    const contactSorted = computed(() => {
+      const ints = [...interactions.value];
+      if (sortContacts.value == "Pending") {
+        const contactList = [];
+        // SORT BASED ON PENDING
+        const map = ints.reduce(function (p, c) {
+          if (!c.actioned && !c.reachOut) {
+            p[c.contact] = (p[c.contact] || 0) + 1;
+          }
+          return p;
+        }, {});
+        var array = [];
+        for (var a in map) {
+          array.push({ k: a, count: map[a] });
+        }
+        array
+          .sort(function (a, b) {
+            return b.count - a.count;
+          })
+          .map((a) => contactList.push(a.k));
+        console.log("array sorted = ", array);
+        return contactList;
+      } else if (sortContacts.value == "Oldest") {
+        const contactList = [];
+        const sortedContacts = [...contacts.value].sort(function (a, b) {
+          return new Date(a.lastUpdate) - new Date(b.lastUpdate);
+        });
+
+        sortedContacts.map((c) => contactList.push(c.id));
+        return contactList;
+      } else {
+        // Default latest update first
+        const contactList = [];
+        const sortedContacts = [...contacts.value].sort(function (a, b) {
+          return new Date(b.lastUpdate) - new Date(a.lastUpdate);
+        });
+
+        sortedContacts.map((c) => contactList.push(c.id));
+        return contactList;
+      }
+
+      // if (sortContacts.value == "Oldest") {
+
+      //   const sortedInts = ints.sort(function (a, b) {
+      //     // Turn your strings into dates, and then subtract them
+      //     // to get a value that is either negative, positive, or zero.
+      //     return new Date(a.contactDate) - new Date(b.contactDate);
+      //   });
+      //   sortedInts.forEach((a) => contactList.push(a.contact));
+      //   return contactList;
+      // } else
+
+      // } else {
+      //   const contactList = [];
+      //   const sortedInts = ints.sort(function (a, b) {
+      //     // Turn your strings into dates, and then subtract them
+      //     // to get a value that is either negative, positive, or zero.
+      //     return new Date(b.contactDate) - new Date(a.contactDate);
+      //   });
+      //   sortedInts.forEach((a) => contactList.push(a.contact));
+      //   console.log("sorted list = ", contactList);
+      //   return contactList;
+      // }
     });
     const exportData = () => {
       const filename = "data.json";
@@ -157,6 +237,7 @@ export default defineComponent({
     return {
       textSearch,
       exportData,
+      sortContacts,
       phone,
       filteredContacts,
     };

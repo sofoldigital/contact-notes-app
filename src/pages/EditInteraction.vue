@@ -85,6 +85,7 @@ export default defineComponent({
       const { interaction, contact } = ev;
       const currentDate = new Date().toISOString();
       const actioned = interaction.actioned;
+      interaction.contact = originalInteraction.contact;
       if (actioned !== originalInteraction.actioned) {
         if (actioned) {
           interaction.actionedBy = uid.value;
