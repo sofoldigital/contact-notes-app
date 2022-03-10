@@ -59,7 +59,7 @@ service cloud.firestore {
   }
 }
 ```
-3. Click "Deploy and Test"
+3. Click "Publish"
 
 This ensures only users who have been authenticated through firebase auth are able to read and write to the database.
 
