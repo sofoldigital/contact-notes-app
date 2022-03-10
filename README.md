@@ -38,7 +38,7 @@ Optional:
 When creating the profile documents:
 
 - Document ID should be the UID for the user
-- Field should be "name"
+- Field should be "displayName"
 - Value should be the name of the user who the UID belongs to
 
 6. Click Save
@@ -108,6 +108,7 @@ e.g.
 7. Once logged in type "firebase init" to initialise firebase. Select existing project and Firestore and Hosting: configure files features.
 8. Keep pressing enter until it asks "What do you want to use as your public directory?" type "dist/spa"
 9. Keep pressing enter until it completes the firebase initialisation.
+10. Do not deploy the app yet you will need to build the app first.
 
 ## Build the app for production
 
