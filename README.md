@@ -20,28 +20,6 @@ Optional:
 3. Give your project a name your app address will ultimately be https://your-project-name.web.app
 4. You will not require google analytics.
 
-## Configure your firebase web app
-
-1. It will say "Get started by adding a firebase app" select the 3rd button (web)
-2. Give your app a name again and select "Also set up firebase hosting" then select register app.
-3. Copy the firebase config object (starting from and ending after the curly brackets). You will need this when configuring the app.
-   e.g.
-
-```
-{
-  apiKey: "AIzaSyD6Ys2eqoXhDslhv8cPhMMCjJ2iRMnRjLU",
-  authDomain: "contact-notes-e0d03.firebaseapp.com",
-  projectId: "contact-notes-e0d03",
-  storageBucket: "contact-notes-e0d03.appspot.com",
-  messagingSenderId: "453942763492",
-  appId: "1:453942763492:web:eb2619af3252ca9840b1f1"
-}
-```
-
-4. On the firebase app setup click next
-5. Copy the code to install firebase CLI and paste it in your terminal CLI then click next.
-6. Type "firebase login" in your terminal and login to your firebase account. You do not need to type the other commands just click "Go to console" to end the app setup wizard.
-
 ## Configure your user accounts for authentication
 
 1. Click "Authentication" from the left nav bar and click "Get Started"
@@ -86,19 +64,31 @@ cd contact-notes-app
 npm install
 ```
 
-## Configure the app
+## Configure your firebase web app
 
-1. Open the file contact-notes-app/quasar.conf.js and search for "firebaseConfig"
-2. Replace the config object with the object copied from step 3 from configuring the firebase app. If you don't have this you can find it from the project "Settings" page (click the cog next to Project overview from your firebase project)
-3. Open the contact-notes-app/.firebaserc file and edit the project ID value set next to "default" to match the projectId from your firebase config.
+1. It will say "Get started by adding a firebase app" select the 3rd button (web)
+2. Give your app a name again and select "Also set up firebase hosting" then select register app.
+3. Copy the firebase config object (starting from and ending after the curly brackets).
 
-### Install the app localy
+e.g.
 
-Check the app works by running the following command to run the app locally
-
-```bash
-quasar dev
 ```
+{
+  apiKey: "AIzaSyD6Ys2eqoXhDslhv8cPhMMCjJ2iRMnRjLU",
+  authDomain: "contact-notes-e0d03.firebaseapp.com",
+  projectId: "contact-notes-e0d03",
+  storageBucket: "contact-notes-e0d03.appspot.com",
+  messagingSenderId: "453942763492",
+  appId: "1:453942763492:web:eb2619af3252ca9840b1f1"
+}
+```
+
+4. Open contact-notes-app/quasar.conf.js and search for "firebaseConfig". Paste the config object in place of the curly brackets. Once you have pasted the config, click next.
+5. Install firebase CLI using the command provided
+6. Type "firebase login" in your terminal and login to your firebase account.
+7. Once logged in type "firebase init" to initialise firebase. Select existing project and Firestore and Hosting: configure files features.
+8. Keep pressing enter until it asks "What do you want to use as your public directory?" type "dist/spa"
+9. Keep pressing enter until it completes the firebase initialisation.
 
 ## Build the app for production
 
