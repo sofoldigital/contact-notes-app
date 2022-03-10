@@ -4,14 +4,7 @@ import "firebase/auth";
 import "firebase/storage";
 import "firebase/functions";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDz9U5vCkcQaOFn9XpMxrrttPnGVCZ3eZ4",
-  authDomain: "contact-notes-app.firebaseapp.com",
-  projectId: "contact-notes-app",
-  storageBucket: "contact-notes-app.appspot.com",
-  messagingSenderId: "16126267907",
-  appId: "1:16126267907:web:fa5e44d93e81a568a0f436",
-};
+const firebaseConfig = process.env.firebaseConfig;
 
 firebase.initializeApp(firebaseConfig);
 

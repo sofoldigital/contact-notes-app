@@ -41,10 +41,11 @@ export default defineComponent({
     const addInteraction = async (ev) => {
       loading.value = true;
       const { interaction } = ev;
-      const currentDate = Date.now();
+      const currentDate = new Date().toISOString();
+      console.log("current date = ", currentDate);
       const actioned = interaction.actioned;
       interaction.contactDate = currentDate;
-      interaction.dateActioned = actioned ? currentDate : null;
+      interaction.dateActioned = actioned ? currentDate : "";
       interaction.actionedBy = actioned ? profile.value.id : "";
       interaction.contact = contact.value.id;
       const response = await $store.dispatch(

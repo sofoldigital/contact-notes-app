@@ -37,3 +37,12 @@ export async function editInteraction({ commit, state }, payload) {
     return { error: err.message };
   }
 }
+
+export async function deleteInteraction({ commit, state }, id) {
+  try {
+    await db.collection("interactions").doc(id).delete();
+    return { error: null };
+  } catch (err) {
+    return { error: err.message };
+  }
+}

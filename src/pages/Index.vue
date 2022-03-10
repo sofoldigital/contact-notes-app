@@ -5,10 +5,11 @@
       <div class="col-12 col-sm-5">
         <q-input
           v-model="phone"
-          label="Phone Search"
+          label="Phone"
           style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"
           maxlength="15"
+          type="number"
         >
           <template v-slot:prepend>
             <q-icon name="phone" />
@@ -27,13 +28,13 @@
       <div class="col-12 col-sm-5">
         <q-input
           v-model="textSearch"
-          label="Message Search"
+          label="Search"
           style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"
           maxlength="30"
         >
           <template v-slot:prepend>
-            <q-icon name="sms" />
+            <q-icon name="notes" />
           </template>
           <template v-slot:append>
             <q-icon
@@ -57,7 +58,7 @@
       ></ContactExpansion>
     </div>
     <div v-if="filteredContacts.length == 0" class="text-center">
-      Contact does not exist...
+      No contacts found...
     </div>
     <div class="text-center q-mt-md">
       <q-btn
@@ -108,9 +109,14 @@ export default defineComponent({
       const regexp = new RegExp(searchValue, "i");
       const validContacts = [];
       if (searchValue) {
-        $store.state.interactions.interactions.filter((x) => {
+        $store.state.interactions.interactions.forEach((x) => {
           if (regexp.test(x.message)) {
             validContacts.push(x.contact);
+          }
+        });
+        contacts.value.forEach((c) => {
+          if (regexp.test(c.contactName)) {
+            validContacts.push(c.id);
           }
         });
         return validContacts;
@@ -120,7 +126,10 @@ export default defineComponent({
       }
     });
 
+    const nameSearch = ref("");
+
     const filteredContacts = computed(() => {
+      const filteredIds = [...interactionsWithSearchText.value];
       const searchValue = phone.value;
       const regexp = new RegExp(searchValue, "i");
       let filteredResults = contacts.value.filter((x) => {

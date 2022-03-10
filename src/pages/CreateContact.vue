@@ -34,7 +34,7 @@ export default defineComponent({
     const createContact = async (ev) => {
       loading.value = true;
       const { contact } = ev;
-      const currentDate = Date.now();
+      const currentDate = new Date().toISOString();
       contact.lastUpdate = currentDate;
       contact.createdAt = currentDate;
       const response = await $store.dispatch("contacts/createContact", contact);

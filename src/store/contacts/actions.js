@@ -34,3 +34,17 @@ export async function editContact({ commit, state }, payload) {
     return { error: err.message };
   }
 }
+
+export async function deleteContact({ commit, state }, payload) {
+  const { interactions, id } = payload;
+  try {
+    console.log("interactions =", interactions, id);
+    interactions.forEach((interaction) => {
+      db.collection("interactions").doc(interaction.id).delete();
+    });
+    await db.collection("contacts").doc(id).delete();
+    return { error: null };
+  } catch (err) {
+    return { error: err.message };
+  }
+}

@@ -43,7 +43,16 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "hash", // available values: 'hash', 'history'
-
+      env: {
+        firebaseConfig: {
+          apiKey: "AIzaSyDz9U5vCkcQaOFn9XpMxrrttPnGVCZ3eZ4",
+          authDomain: "contact-notes-app.firebaseapp.com",
+          projectId: "contact-notes-app",
+          storageBucket: "contact-notes-app.appspot.com",
+          messagingSenderId: "16126267907",
+          appId: "1:16126267907:web:fa5e44d93e81a568a0f436",
+        },
+      },
       // transpile: false,
       // publicPath: '/',
 
@@ -204,7 +213,6 @@ module.exports = configure(function (ctx) {
 
       builder: {
         // https://www.electron.build/configuration/configuration
-
         appId: "contact-notes-app",
       },
 

@@ -9,3 +9,12 @@ export function setLoading(state, payload) {
 export function setUnsubscribe(state, payload) {
   state.unsubscribe = payload;
 }
+
+export function unsubscribeInteractions(state, payload) {
+  if (state.unsubscribe) {
+    state.unsubscribe();
+  }
+  state.interactions = [];
+  state.loading = false;
+  state.unsubscribe = null;
+}

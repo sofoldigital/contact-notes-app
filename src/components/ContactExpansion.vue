@@ -1,7 +1,7 @@
 <template>
   <q-expansion-item
     header-class="bg-white font-weight-bold"
-    class="shadow-1 overflow-hidden q-mb-md"
+    class="shadow-1 overflow-hidden q-mb-md q-mx-auto"
     style="border-radius: 30px"
     expand-icon-class="text-primary"
     v-model="expanded"
@@ -29,20 +29,25 @@
             >{{ contactName
             }}<span class="text-grey q-ml-sm">({{ phone }})</span></q-item-label
           >
+          <q-item-label caption v-if="email">
+            <q-icon name="email" class="q-mr-sm"></q-icon
+            ><span>{{ email }}</span>
+          </q-item-label>
+          <q-item-label caption v-if="fax">
+            <q-icon name="fax" class="q-mr-sm"></q-icon><span>{{ fax }}</span>
+          </q-item-label>
           <q-item-label caption>
-            <span>{{ contactHistory.length }} interactions</span>
+            <span></span>
           </q-item-label>
         </q-item-section>
-        <q-chip color="warning" v-if="numberOfPending > 0">
-          {{ numberOfPending
-          }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Pending</span>
-        </q-chip>
-        <q-item-section
-          side
-          class="text-right text-caption"
-          v-if="!$q.screen.lt.sm"
-          >Last update:<br />
-          {{ formattedString(lastUpdate) }}
+        <q-item-section side class="text-right text-caption">
+          <q-chip color="warning" v-if="numberOfPending > 0">
+            {{ numberOfPending
+            }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Pending</span>
+          </q-chip>
+        </q-item-section>
+        <q-item-section v-if="!$q.screen.lt.sm" class="text-right">
+          {{ contactHistory.length }} interactions
         </q-item-section>
       </q-item>
       <q-space></q-space>
@@ -93,7 +98,7 @@ export default {
     },
 
     createdAt: {
-      type: Number,
+      type: String,
       required: true,
     },
 
@@ -101,8 +106,12 @@ export default {
       type: String,
     },
 
+    fax: {
+      type: String,
+    },
+
     lastUpdate: {
-      type: Number,
+      type: String,
       required: true,
     },
 

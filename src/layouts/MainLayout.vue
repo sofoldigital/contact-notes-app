@@ -1,18 +1,13 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
-        <q-toolbar-title> Contact Notes App </q-toolbar-title>
+      <q-toolbar v-if="isHomeView">
+        <q-toolbar-title> Contacts </q-toolbar-title>
         <div class="text-right" v-if="profile && !$q.screen.lt.sm">
-          Logged in as: <br />{{ profile.displayName }}
+          Logged in as {{ profile.displayName }}
         </div>
-        <q-btn
-          icon="exit_to_app"
-          class="q-ml-md"
-          round
-          flat
-          @click="logOut"
-          color="white"
+        <q-btn class="q-ml-md" flat @click="logOut" color="white"
+          >Logout <q-icon class="q-ml-sm" name="exit_to_app"></q-icon
         ></q-btn>
       </q-toolbar>
     </q-header>
@@ -71,12 +66,19 @@ export default defineComponent({
     );
 
     const logOut = async () => {
+      $store.commit("contacts/unsubscribeContacts");
+      $store.commit("users/unsubscribeUsers");
+      $store.commit("interactions/unsubscribeInteractions");
       await $store.dispatch("users/logUserOut");
       $router.replace({ name: "Login" });
     };
+    const isHomeView = computed(() => {
+      return $router.currentRoute.value.name === "Home";
+    });
     return {
       profile,
       logOut,
+      isHomeView,
       loaded,
     };
   },
