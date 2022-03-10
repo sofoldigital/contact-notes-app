@@ -44,6 +44,25 @@ When creating the profile documents:
 6. Click Save
 7. If you have more users make sure you have the "Users" collection selected and click "Add Document".
 
+## Configure firestore security rules
+
+1. Click on "Firestore" and then "Rules" to configure your backend security rules.
+2. Replace the code with the following code:
+
+```bash
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null
+    }
+  }
+}
+```
+3. Click "Deploy and Test"
+
+This ensures only users who have been authenticated through firebase auth are able to read and write to the database.
+
 ## Download the repository
 
 With git:
