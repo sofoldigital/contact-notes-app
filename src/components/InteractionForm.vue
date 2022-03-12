@@ -46,9 +46,25 @@
       lazy-rules
       :rules="[(val) => (val && val.length > 0) || 'Enter a contact message']"
     />
-    <q-checkbox left-label v-model="actioned" label="Has this been Actioned?" />
+    <div class="row">
+      <div class="col col-12 col-sm-6" v-if="!reachOut">
+        <q-checkbox
+          left-label
+          v-model="actioned"
+          label="Has this been Actioned?"
+        />
+      </div>
+      <div class="col col-12 col-sm-6">
+        <q-checkbox
+          left-label
+          v-model="reachOut"
+          color="purple"
+          label="Reach out?"
+        />
+      </div>
+    </div>
     <q-input
-      v-if="actioned"
+      v-if="actioned && !reachOut"
       filled
       autogrow
       v-model="actionTaken"
@@ -108,6 +124,11 @@ export default {
       default: "",
     },
 
+    originalReachOut: {
+      type: Boolean,
+      default: false,
+    },
+
     id: {
       type: String,
       default: null,
@@ -124,17 +145,33 @@ export default {
 
     const actionTaken = ref(props.originalActionTaken);
 
+    const reachOut = ref(props.originalReachOut);
+
     const actioned = ref(props.originalActioned ? true : false);
 
     const id = ref(props.id ? true : false);
+    const uid = computed(() => $store.state.users.user.uid);
 
     const onSubmit = async () => {
+      if (reachOut.value) {
+        actionTaken.value = "";
+        actioned.value = false;
+      }
+      const getStatus = () => {
+        if (reachOut.value) {
+          return "Reach Out";
+        } else {
+          return actioned.value ? "Actioned" : "Pending";
+        }
+      };
       context.emit("onSubmit", {
         interaction: {
           typeOfContact: typeOfContact.value,
           message: message.value,
           actionTaken: actionTaken.value,
           actioned: actioned.value,
+          reachOut: reachOut.value,
+          status: getStatus(),
         },
         contact: id,
       });
@@ -153,6 +190,7 @@ export default {
       message,
       options,
       actionTaken,
+      reachOut,
       onSubmit,
     };
   },

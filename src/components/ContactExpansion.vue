@@ -9,11 +9,9 @@
     <template v-slot:header>
       <q-item dense class="full-width q-pl-none">
         <q-item-section avatar>
-          <q-btn
-            icon="edit"
-            color="primary"
-            round
-            dense
+          <q-avatar
+            class="bg-grey"
+            :size="!$q.screen.lt.sm ? '80px' : '50px'"
             @click="
               $router.push({
                 name: 'Edit Contact',
@@ -22,7 +20,14 @@
                 },
               })
             "
-          ></q-btn>
+          >
+            <img
+              v-if="updatedImageUrl"
+              :src="updatedImageUrl"
+              :onerror="resetImage"
+            />
+            <q-icon v-else name="person" class="text-white"></q-icon>
+          </q-avatar>
         </q-item-section>
         <q-item-section>
           <q-item-label lines="1" class="text-weight-bold"
@@ -47,7 +52,8 @@
           </q-chip>
         </q-item-section>
         <q-item-section v-if="!$q.screen.lt.sm" class="text-right">
-          {{ contactHistory.length }} interactions
+          <span class="text-caption text-grey">{{ formattedDate }}</span>
+          {{ contactHistory.length }} interactions <br />
         </q-item-section>
       </q-item>
       <q-space></q-space>
@@ -87,6 +93,11 @@ export default {
       required: true,
     },
 
+    imageUrl: {
+      type: String,
+      default: "",
+    },
+
     phone: {
       type: String,
       required: true,
@@ -121,24 +132,37 @@ export default {
     },
   },
   setup(props, context) {
+    const updatedImageUrl = ref(props.imageUrl);
     const numberOfPending = computed(() => {
-      const pendingActions = props.contactHistory.filter((x) => !x.actioned);
+      const pendingActions = props.contactHistory.filter((x) => {
+        return x.status === "Pending";
+      });
       return pendingActions.length;
     });
     const expanded = ref(false);
     const formattedString = (val) => {
       const timestamp = new Date(val);
-      return date.formatDate(timestamp, "DD-MMM-YY");
+      return date.formatDate(timestamp, "DD-MMM-YY hh:mm");
     };
+
+    const formattedDate = computed(() => {
+      return date.formatDate(props.lastUpdate, "DD-MMM-YY h:mm a");
+    });
 
     watchEffect(() => {
       if (props.phone === props.phoneSearch) {
         expanded.value = true;
       }
     });
+    const resetImage = () => {
+      console.log("reset image");
+      updatedImageUrl.value = "";
+    };
     return {
-      formattedString,
       numberOfPending,
+      resetImage,
+      formattedDate,
+      updatedImageUrl,
       expanded,
     };
   },

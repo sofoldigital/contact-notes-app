@@ -19,6 +19,7 @@ import { defineComponent, ref, computed } from "vue";
 import InteractionForm from "../components/InteractionForm.vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "AddInteraction",
@@ -28,6 +29,7 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const $router = useRouter();
+    const $q = useQuasar();
     const contact = computed(() =>
       $store.state.contacts.contacts.find(
         (c) => c.id === $router.currentRoute.value.params.id
@@ -47,15 +49,29 @@ export default defineComponent({
       interaction.contactDate = currentDate;
       interaction.dateActioned = actioned ? currentDate : "";
       interaction.actionedBy = actioned ? profile.value.id : "";
+      interaction.createdBy = profile.value.id;
+      interaction.createdByName = profile.value.displayName;
       interaction.contact = contact.value.id;
       const response = await $store.dispatch(
         "interactions/addInteraction",
         interaction
       );
       if (!response.error) {
-        $router.push({ name: "Home", query: { phone: contact.value.phone } });
+        $q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "check",
+          message: "Interaction Added",
+        });
+        $router.push({ name: "Home" });
       } else {
         console.log("error ", response.error);
+        $q.notify({
+          color: "negative",
+          textColor: "white",
+          icon: "error",
+          message: response.error,
+        });
       }
       loading.value = false;
       // contact.lastUpdate = currentDate;
