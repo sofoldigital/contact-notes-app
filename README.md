@@ -53,11 +53,20 @@ When creating the profile documents:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth != null
+    match /interactions/{interactionId} {
+      allow read, create, update: if request.auth != null
+      allow delete: if request.auth.token.email == 'nicktest@test.com'
+    }
+    match /contacts/{contactId} {
+      allow read, create, update: if request.auth != null
+      allow delete: if request.auth.token.email == 'nicktest@test.com' || 'stevetest@test.com'
+    }
+    match /users/{userId} {
+      allow read: if request.auth != null
     }
   }
 }
+
 ```
 
 3. Click "Publish"
