@@ -20,6 +20,7 @@ import { defineComponent, ref, computed } from "vue";
 import ContactForm from "../components/ContactForm";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "CreateContact",
@@ -29,6 +30,7 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const $router = useRouter();
+    const $q = useQuasar();
     const phone = $router.currentRoute.value.query.phone || "";
     const loading = ref(false);
     const createContact = async (ev) => {
@@ -39,8 +41,20 @@ export default defineComponent({
       contact.createdAt = currentDate;
       const response = await $store.dispatch("contacts/createContact", contact);
       if (!response.error) {
-        $router.push({ name: "Home", query: { phone: contact.phone } });
+        $q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "check",
+          message: "Contact Created",
+        });
+        $router.push({ name: "Home" });
       } else {
+        $q.notify({
+          color: "negative",
+          textColor: "white",
+          icon: "error",
+          message: response.error,
+        });
         console.log("error ", response.error);
       }
       loading.value = false;

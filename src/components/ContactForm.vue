@@ -1,5 +1,11 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
+    <div class="row">
+      <q-avatar size="100px" v-if="imageUrl" class="q-mx-auto">
+        <img :src="imageUrl" />
+        <q-icon name="error"></q-icon>
+      </q-avatar>
+    </div>
     <q-input
       filled
       v-model="phone"
@@ -18,7 +24,7 @@
       lazy-rules
       :rules="[(val) => (val !== null && val !== '') || 'Enter a contact name']"
     />
-
+    <q-input filled v-model="imageUrl" label="Image URL" />
     <q-input filled v-model="email" label="Email" />
     <q-input filled v-model="fax" label="Fax" />
 
@@ -53,6 +59,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    originalImageUrl: {
+      type: String,
+      default: "",
+    },
 
     originalPhone: {
       type: String,
@@ -85,7 +95,16 @@ export default {
     const phone = ref(props.originalPhone);
     const email = ref(props.originalEmail);
     const fax = ref(props.originalFax);
+    const errorLoading = ref(false);
+    const updateError = (type) => {
+      if (type == "error") {
+        errorLoading.value = true;
+      } else {
+        return (errorLoading.value = false);
+      }
+    };
     const contactName = ref(props.originalName);
+    const imageUrl = ref(props.originalImageUrl);
     const id = ref(props.id);
     const phoneExists = computed(() => {
       if (!id.value) {
@@ -106,6 +125,7 @@ export default {
           email: email.value,
           fax: fax.value,
           lastUpdate: Date.now(),
+          imageUrl: imageUrl.value,
         },
         id: id.value,
       });
@@ -114,8 +134,11 @@ export default {
     return {
       email,
       contactName,
+      imageUrl,
       fax,
       phoneExists,
+      updateError,
+      errorLoading,
       phone,
       onSubmit,
     };

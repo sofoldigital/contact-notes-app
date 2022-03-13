@@ -23,6 +23,7 @@
           :originalActioned="originalInteraction.actioned"
           :originalMessage="originalInteraction.message"
           :originalActionTaken="originalInteraction.actionTaken"
+          :originalReachOut="originalInteraction.reachOut"
           :id="originalInteraction.id"
         ></InteractionForm>
         <q-dialog v-model="confirm" persistent>
@@ -61,6 +62,7 @@ import { defineComponent, ref, computed } from "vue";
 import InteractionForm from "../components/InteractionForm.vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "EditInteraction",
@@ -70,6 +72,7 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const $router = useRouter();
+    const $q = useQuasar();
     const originalInteraction = {
       ...$store.state.interactions.interactions.find(
         (i) => i.id === $router.currentRoute.value.params.id
@@ -85,6 +88,7 @@ export default defineComponent({
       const { interaction, contact } = ev;
       const currentDate = new Date().toISOString();
       const actioned = interaction.actioned;
+      interaction.contact = originalInteraction.contact;
       if (actioned !== originalInteraction.actioned) {
         if (actioned) {
           interaction.actionedBy = uid.value;
@@ -100,9 +104,21 @@ export default defineComponent({
         id: $router.currentRoute.value.params.id,
       });
       if (!response.error) {
-        $router.push({ name: "Home", query: { phone: contact.value.phone } });
+        $q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "check",
+          message: "Interaction Updated",
+        });
+        $router.push({ name: "Home" });
       } else {
         console.log("error ", response.error);
+        $q.notify({
+          color: "negative",
+          textColor: "white",
+          icon: "error",
+          message: response.error,
+        });
       }
       loading.value = false;
     };
@@ -114,9 +130,20 @@ export default defineComponent({
         originalInteraction.id
       );
       if (!response.error) {
+        $q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "check",
+          message: "Interaction Deleted",
+        });
         $router.push({ name: "Home" });
       } else {
-        console.log("error ", response.error);
+        $q.notify({
+          color: "negative",
+          textColor: "white",
+          icon: "error",
+          message: response.error,
+        });
       }
       deleteLoading.value = false;
     };

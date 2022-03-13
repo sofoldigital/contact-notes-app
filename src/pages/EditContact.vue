@@ -23,6 +23,7 @@
           :originalName="originalContact.contactName"
           :originalFax="originalContact.fax"
           :originalEmail="originalContact.email"
+          :originalImageUrl="originalContact.imageUrl"
           :id="originalContact.id"
         ></ContactForm>
         <q-dialog v-model="confirm" persistent>
@@ -30,8 +31,12 @@
             <q-card-section>
               <q-item class="row items-center">
                 <q-item-section avatar>
-                  <q-avatar icon="warning" color="negative" text-color="white"
-                /></q-item-section>
+                  <q-avatar
+                    icon="warning"
+                    color="negative"
+                    text-color="white"
+                  />
+                </q-item-section>
                 <q-item-section>
                   <span class="q-ml-sm"
                     >Are you sure? Deleting this contact will remove any
@@ -62,6 +67,7 @@ import { defineComponent, ref, computed } from "vue";
 import ContactForm from "../components/ContactForm";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "CreateContact",
@@ -71,6 +77,7 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const $router = useRouter();
+    const $q = useQuasar();
     const originalContact = {
       ...$store.state.contacts.contacts.find(
         (i) => i.id === $router.currentRoute.value.params.id
@@ -89,9 +96,20 @@ export default defineComponent({
         id: $router.currentRoute.value.params.id,
       });
       if (!response.error) {
-        $router.push({ name: "Home", query: { phone: contact.phone } });
+        $q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "check",
+          message: `Contact Updated`,
+        });
+        $router.push({ name: "Home" });
       } else {
-        console.log("error ", response.error);
+        $q.notify({
+          color: "negative",
+          textColor: "white",
+          icon: "error",
+          message: response.error,
+        });
       }
       loading.value = false;
     };
@@ -112,9 +130,20 @@ export default defineComponent({
       console.log("payload", payload);
       const response = await $store.dispatch("contacts/deleteContact", payload);
       if (!response.error) {
+        $q.notify({
+          color: "positive",
+          textColor: "white",
+          icon: "check",
+          message: "Contact Deleted",
+        });
         $router.push({ name: "Home" });
       } else {
-        console.log("error ", response.error);
+        $q.notify({
+          color: "negative",
+          textColor: "white",
+          icon: "error",
+          message: response.error,
+        });
       }
       deleteLoading.value = false;
     };

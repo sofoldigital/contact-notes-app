@@ -31,10 +31,12 @@
         </q-td>
         <q-td key="status" :props="props">
           <q-chip
-            :color="props.row.actioned ? 'positive' : 'warning'"
-            :class="props.row.actioned ? 'text-white' : 'text-black'"
+            :color="getColor(props.row.status)"
+            :class="
+              props.row.status === 'Pending' ? 'text-black' : 'text-white'
+            "
           >
-            {{ props.row.actioned ? "Actioned" : "Pending" }}
+            {{ props.row.status }}
           </q-chip>
         </q-td>
         <q-td key="contactDate" :props="props">
@@ -45,10 +47,15 @@
           ></q-icon>
           {{ props.row.formattedDateOfContact }}
         </q-td>
+        <q-td key="createdByName" :props="props">
+          <div>
+            {{ props.row.createdByName }}
+          </div>
+        </q-td>
         <q-td key="message" :props="props">
           <div
             style="
-              width: 300px;
+              min-width: 200px;
               overflow-wrap: break-word;
               white-space: initial;
             "
@@ -59,7 +66,7 @@
         <q-td key="actionTaken" :props="props">
           <div
             style="
-              width: 200px;
+              min-width: 150px;
               overflow-wrap: break-word;
               white-space: initial;
             "
@@ -107,9 +114,9 @@
       >
         <q-card>
           <q-card-section
-            :class="
-              props.row.actioned ? 'bg-positive text-white' : 'bg-warning'
-            "
+            :class="`bg-${getColor(props.row.status)} ${
+              props.row.status == 'Pending' ? 'text-black' : 'text-white'
+            }`"
           >
             <q-item>
               <q-item-section avatar>
@@ -124,9 +131,9 @@
                 </q-item-label>
                 <q-item-label
                   caption
-                  :class="props.row.actioned ? 'text-white' : ''"
+                  :class="props.row.status == 'Pending' ? '' : 'text-white'"
                 >
-                  {{ props.row.actioned ? "Actioned" : "Pending" }}
+                  {{ props.row.status }}
                 </q-item-label>
               </q-item-section>
               <q-item-section side>
@@ -151,6 +158,10 @@
           </q-card-section>
           <q-separator />
           <q-card-section>
+            <div class="q-mb-sm">
+              <q-item-label caption>Entered by</q-item-label>
+              {{ props.row.createdByName }}
+            </div>
             <div class="q-mb-sm">
               <q-item-label caption>Message</q-item-label>
               {{ props.row.message }}
@@ -205,10 +216,6 @@ export default {
   },
   setup(props, context) {
     const $store = useStore();
-    const formattedString = (val) => {
-      const timestamp = new Date(val);
-      return date.formatDate(timestamp, "DD-MMM-YY");
-    };
     const profiles = computed(() => $store.state.users.profiles);
     const getProfileName = (id) => {
       const profile = profiles.value.find((profile) => profile.id === id);
@@ -220,8 +227,14 @@ export default {
         const dateActioned = new Date(h.dateActioned);
         const newHistory = {
           ...h,
-          formattedDateOfContact: date.formatDate(contactDate, "DD-MMM-YY"),
-          formattedDateActioned: date.formatDate(dateActioned, "DD-MMM-YY"),
+          formattedDateOfContact: date.formatDate(
+            contactDate,
+            "DD-MMM-YY h:mm a"
+          ),
+          formattedDateActioned: date.formatDate(
+            dateActioned,
+            "DD-MMM-YY  h:mm a"
+          ),
         };
         return newHistory;
       });
@@ -232,7 +245,7 @@ export default {
         name: "status",
         label: "Status",
         align: "center",
-        field: "actioned",
+        field: "status",
         sortable: true,
       },
       {
@@ -242,7 +255,20 @@ export default {
         field: "contactDate",
         align: "left",
         sortable: true,
-        sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+        sort: (a, b) => {
+          return a < b ? -1 : a > b ? 1 : 0;
+        },
+      },
+      {
+        name: "createdByName",
+        required: true,
+        label: "Entered By",
+        field: "createdByName",
+        align: "left",
+        sortable: true,
+        sort: (a, b) => {
+          return a < b ? -1 : a > b ? 1 : 0;
+        },
       },
       {
         name: "message",
@@ -274,12 +300,19 @@ export default {
       },
     ];
 
+    const getColor = (val) => {
+      if (val == "Reach Out") {
+        return "purple";
+      } else {
+        return val == "Actioned" ? "positive" : "warning";
+      }
+    };
     return {
       loading: ref(false),
       columns,
+      getColor,
       formattedHistory,
       getProfileName,
-      formattedString,
     };
   },
 };
