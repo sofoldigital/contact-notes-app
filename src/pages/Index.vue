@@ -98,6 +98,7 @@ export default defineComponent({
     const $store = useStore();
 
     const $router = useRouter();
+    console.log("setup", $store.state.contacts);
 
     const phone = ref("");
 

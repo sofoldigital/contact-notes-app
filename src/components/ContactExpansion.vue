@@ -22,7 +22,7 @@
             "
           >
             <img
-              v-if="updatedImageUrl"
+              v-if="updatedImageUrl && isAdmin"
               :src="updatedImageUrl"
               :onerror="resetImage"
             />
@@ -72,6 +72,7 @@
 <script>
 import ContactHistoryTable from "./ContactHistoryTable.vue";
 import { computed, ref, watchEffect } from "vue";
+import { useStore } from "vuex";
 import { date } from "quasar";
 export default {
   components: {
@@ -133,17 +134,19 @@ export default {
   },
   setup(props, context) {
     const updatedImageUrl = ref(props.imageUrl);
+    const $store = useStore();
     const numberOfPending = computed(() => {
       const pendingActions = props.contactHistory.filter((x) => {
         return x.status === "Pending";
       });
       return pendingActions.length;
     });
+    const isAdmin = computed(() => {
+      const uid = $store.state.users.user.uid;
+      const profile = $store.state.users.profiles.find((p) => p.id === uid);
+      return profile.admin;
+    });
     const expanded = ref(false);
-    const formattedString = (val) => {
-      const timestamp = new Date(val);
-      return date.formatDate(timestamp, "DD-MMM-YY hh:mm");
-    };
 
     const formattedDate = computed(() => {
       return date.formatDate(props.lastUpdate, "DD-MMM-YY h:mm a");
@@ -163,6 +166,7 @@ export default {
       resetImage,
       formattedDate,
       updatedImageUrl,
+      isAdmin,
       expanded,
     };
   },
