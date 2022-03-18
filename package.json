@@ -6,6 +6,7 @@
   "author": "Steve <steve@sofol.digital>",
   "private": true,
   "scripts": {
+    "deploy": "quasar build && firebase deploy",
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write \"**/*.{js,vue,,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0"
