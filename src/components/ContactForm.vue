@@ -13,8 +13,9 @@
       lazy-rules
       :rules="[
         (val) => (val && val.length > 0) || 'Enter a contact phone',
-        (val) => val.substring(0, 1) == '0' || 'Must start with a zero',
-        (val) => val.length === 10 || 'Must be 10 characters in length',
+        (val) =>
+          validPhone ||
+          'Enter a valid phone (starting with 0, 18, 13 without spaces)',
         () => !phoneExists || 'Contact already exists',
       ]"
     />
@@ -123,6 +124,19 @@ export default {
         return false;
       }
     });
+    const validPhone = computed(() => {
+      if (phone.value.length == 10) {
+        return (
+          phone.value.substring(0, 4) === "1300" ||
+          phone.value.substring(0, 4) === "1800" ||
+          phone.value.substring(0, 1) === "0"
+        );
+      } else if (phone.value.length == 6) {
+        return phone.value.substring(0, 2) === "13";
+      } else {
+        return false;
+      }
+    });
     const $q = useQuasar();
     const onSubmit = async () => {
       context.emit("onSubmit", {
@@ -145,6 +159,7 @@ export default {
       fax,
       isAdmin,
       phoneExists,
+      validPhone,
       updateError,
       errorLoading,
       phone,
