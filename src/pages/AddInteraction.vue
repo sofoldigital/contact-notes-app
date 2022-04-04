@@ -4,6 +4,20 @@
       <q-card-section class="text-h6 text-white text-center bg-primary">
         Add Interaction
       </q-card-section>
+      <q-item>
+        <q-item-section top avatar>
+          <q-avatar v-if="isAdmin && contact.imageUrl != ''">
+            <img :src="contact.imageUrl" />
+          </q-avatar>
+          <q-avatar v-else icon="person" color="grey" class="text-white">
+          </q-avatar>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>{{ contact.contactName }}</q-item-label>
+          <q-item-label caption>{{ contact.phone }}</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-card-section>
         <InteractionForm
           @onSubmit="addInteraction"
@@ -35,6 +49,12 @@ export default defineComponent({
         (c) => c.id === $router.currentRoute.value.params.id
       )
     );
+    const isAdmin = computed(() => {
+      const uid = $store.state.users.user.uid;
+      const profile = $store.state.users.profiles.find((p) => p.id === uid);
+      console.log("isAdmin", profile.admin);
+      return profile.admin;
+    });
     const uid = computed(() => $store.state.users.user.uid);
     const profile = computed(() =>
       $store.state.users.profiles.find((p) => p.id === uid.value)
@@ -87,6 +107,8 @@ export default defineComponent({
     return {
       addInteraction,
       loading,
+      contact,
+      isAdmin,
     };
   },
 });

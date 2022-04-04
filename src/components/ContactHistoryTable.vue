@@ -255,9 +255,6 @@ export default {
         field: "contactDate",
         align: "left",
         sortable: true,
-        sort: (a, b) => {
-          return a < b ? -1 : a > b ? 1 : 0;
-        },
       },
       {
         name: "createdByName",

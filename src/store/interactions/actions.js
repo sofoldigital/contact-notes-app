@@ -5,14 +5,17 @@ export async function fetchInteractions({ commit, state }) {
   if (state.unsubscribe !== null) state.unsubscribe();
   state.unsubscribe = null;
 
-  const unsubscribe = db.collection("interactions").onSnapshot((snapshot) => {
-    const interactions = [];
-    snapshot.forEach((doc) => {
-      interactions.push({ id: doc.id, ...doc.data() });
+  const unsubscribe = db
+    .collection("interactions")
+    .orderBy("contactDate", "desc")
+    .onSnapshot((snapshot) => {
+      const interactions = [];
+      snapshot.forEach((doc) => {
+        interactions.push({ id: doc.id, ...doc.data() });
+      });
+      commit("setInteractions", interactions);
+      commit("setLoading", false);
     });
-    commit("setInteractions", interactions);
-    commit("setLoading", false);
-  });
   commit("setUnsubscribe", unsubscribe);
 }
 
