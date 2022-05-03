@@ -3,7 +3,7 @@
     <q-card style="min-width: 70%; width: 350px">
       <q-card-section class="text-h6 text-white bg-primary">
         <q-item>
-          <q-item-section> Update Contact </q-item-section>
+          <q-item-section> Update Interaction </q-item-section>
           <q-item-section side
             ><q-btn
               round
@@ -15,6 +15,20 @@
           ></q-item-section>
         </q-item>
       </q-card-section>
+      <q-item v-if="originalInteraction">
+        <q-item-section top avatar>
+          <q-avatar v-if="isAdmin && contact.imageUrl != ''">
+            <img :src="contact.imageUrl" />
+          </q-avatar>
+          <q-avatar v-else icon="person" color="grey" class="text-white">
+          </q-avatar>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>{{ contact.contactName }}</q-item-label>
+          <q-item-label caption>{{ contact.phone }}</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-card-section v-if="originalInteraction">
         <InteractionForm
           @onSubmit="updateInteraction"
@@ -78,7 +92,17 @@ export default defineComponent({
         (i) => i.id === $router.currentRoute.value.params.id
       ),
     };
-
+    const contact = computed(() =>
+      $store.state.contacts.contacts.find(
+        (c) => c.id === originalInteraction.contact
+      )
+    );
+    const isAdmin = computed(() => {
+      const uid = $store.state.users.user.uid;
+      const profile = $store.state.users.profiles.find((p) => p.id === uid);
+      console.log("isAdmin", profile.admin);
+      return profile.admin;
+    });
     const uid = computed(() => $store.state.users.user.uid);
     const confirm = ref(false);
     const deleteLoading = ref(false);
@@ -154,6 +178,8 @@ export default defineComponent({
       loading,
       confirm,
       originalInteraction,
+      contact,
+      isAdmin,
     };
   },
 });
