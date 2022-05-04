@@ -16,7 +16,7 @@
         </q-item>
       </q-card-section>
       <q-card-section>
-        <ContactForm
+        <UpdateContact
           @onSubmit="createContact"
           :loading="loading"
           :originalPhone="originalContact.phone"
@@ -25,7 +25,7 @@
           :originalEmail="originalContact.email"
           :originalImageUrl="originalContact.imageUrl"
           :id="originalContact.id"
-        ></ContactForm>
+        ></UpdateContact>
         <q-dialog v-model="confirm" persistent>
           <q-card>
             <q-card-section>
@@ -64,7 +64,7 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
-import ContactForm from "../components/ContactForm";
+import UpdateContact from "../components/UpdateContact";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -72,7 +72,7 @@ import { useQuasar } from "quasar";
 export default defineComponent({
   name: "CreateContact",
   components: {
-    ContactForm,
+    UpdateContact,
   },
   setup() {
     const $store = useStore();
@@ -128,6 +128,7 @@ export default defineComponent({
         interactions: contactInteractions.value,
       };
       console.log("payload", payload);
+
       const response = await $store.dispatch("contacts/deleteContact", payload);
       if (!response.error) {
         $q.notify({

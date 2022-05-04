@@ -93,7 +93,6 @@ export default {
     },
   },
   setup(props, context) {
-    const $router = useRouter();
     const $store = useStore();
     const phone = ref(props.originalPhone);
     const email = ref(props.originalEmail);
@@ -115,8 +114,7 @@ export default {
     const imageUrl = ref(props.originalImageUrl);
     const id = ref(props.id);
     const phoneExists = computed(() => {
-      if (!id.value) {
-        console.log("original phone", props.originalPhone);
+      if (props.originalPhone != phone.value) {
         return $store.state.contacts.contacts.some(
           (c) => c.phone === phone.value
         );
@@ -139,6 +137,8 @@ export default {
     });
     const $q = useQuasar();
     const onSubmit = async () => {
+      console.log("phone exists", phoneExists);
+      console.log("phone value", phone.value);
       context.emit("onSubmit", {
         contact: {
           contactName: contactName.value,

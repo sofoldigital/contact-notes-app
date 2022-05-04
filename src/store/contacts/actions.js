@@ -18,8 +18,8 @@ export async function fetchContacts({ commit, state }) {
 
 export async function createContact({ commit, state }, contact) {
   try {
-    await db.collection("contacts").add(contact);
-    return { error: null };
+    const response = await db.collection("contacts").add(contact);
+    return { error: null, contact: response.id };
   } catch (err) {
     return { error: err.message };
   }

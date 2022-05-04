@@ -64,7 +64,6 @@ export default defineComponent({
       loading.value = true;
       const { interaction } = ev;
       const currentDate = new Date().toISOString();
-      console.log("current date = ", currentDate);
       const actioned = interaction.actioned;
       interaction.contactDate = currentDate;
       interaction.dateActioned = actioned ? currentDate : "";
