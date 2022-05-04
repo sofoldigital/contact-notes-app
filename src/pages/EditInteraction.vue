@@ -34,6 +34,7 @@
           @onSubmit="updateInteraction"
           :loading="loading"
           :originalType="originalInteraction.type"
+          :originalStatus="originalInteraction.status"
           :originalActioned="originalInteraction.actioned"
           :originalMessage="originalInteraction.message"
           :originalActionTaken="originalInteraction.actionTaken"

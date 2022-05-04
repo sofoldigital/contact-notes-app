@@ -27,6 +27,14 @@
               :onerror="resetImage"
             />
             <q-icon v-else name="person" class="text-white"></q-icon>
+            <q-badge
+              v-if="redFlag"
+              floating
+              color="negative"
+              text-color="white"
+            >
+              <q-icon name="flag" size="20px" />
+            </q-badge>
           </q-avatar>
         </q-item-section>
         <q-item-section>
@@ -46,6 +54,10 @@
           </q-item-label>
         </q-item-section>
         <q-item-section side class="text-right text-caption">
+          <q-chip color="negative" class="text-white" v-if="numberOfUrgent > 0">
+            {{ numberOfUrgent
+            }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Urgent</span>
+          </q-chip>
           <q-chip color="warning" v-if="numberOfPending > 0">
             {{ numberOfPending
             }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Pending</span>
@@ -60,6 +72,8 @@
     </template>
     <q-card>
       <q-card-section class="q-pa-lg">
+        <q-item-label caption> Contact Notes </q-item-label>
+        <p>{{ notes }}</p>
         <ContactHistoryTable
           :contactHistory="contactHistory"
           :contactId="id"
@@ -131,6 +145,16 @@ export default {
       type: String,
       required: true,
     },
+
+    redFlag: {
+      type: Boolean,
+      default: false,
+    },
+
+    notes: {
+      type: String,
+      default: "",
+    },
   },
   setup(props, context) {
     const updatedImageUrl = ref(props.imageUrl);
@@ -138,6 +162,12 @@ export default {
     const numberOfPending = computed(() => {
       const pendingActions = props.contactHistory.filter((x) => {
         return x.status === "Pending";
+      });
+      return pendingActions.length;
+    });
+    const numberOfUrgent = computed(() => {
+      const pendingActions = props.contactHistory.filter((x) => {
+        return x.status === "Urgent";
       });
       return pendingActions.length;
     });
@@ -167,6 +197,7 @@ export default {
       formattedDate,
       updatedImageUrl,
       isAdmin,
+      numberOfUrgent,
       expanded,
     };
   },

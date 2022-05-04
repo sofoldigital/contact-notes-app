@@ -24,6 +24,16 @@
           :originalFax="originalContact.fax"
           :originalEmail="originalContact.email"
           :originalImageUrl="originalContact.imageUrl"
+          :originalNotes="
+            typeof originalContact.notes === 'undefined'
+              ? ''
+              : originalContact.notes
+          "
+          :originalRedFlag="
+            typeof originalContact.redFlag === 'undefined'
+              ? false
+              : originalContact.redFlag
+          "
           :id="originalContact.id"
         ></UpdateContact>
         <q-dialog v-model="confirm" persistent>

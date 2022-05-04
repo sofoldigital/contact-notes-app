@@ -7,7 +7,7 @@
           v-model="sortContacts"
           style="width: 200px; max-width: 95%"
           class="q-mx-auto q-mb-md"
-          :options="['Recent Updates', 'Oldest', 'Pending']"
+          :options="['Recent Updates', 'Oldest', 'Pending', 'Urgent']"
           label="Sort by"
         />
       </div>
@@ -162,7 +162,7 @@ export default defineComponent({
         const contactList = [];
         // SORT BASED ON PENDING
         const map = ints.reduce(function (p, c) {
-          if (!c.actioned && !c.reachOut) {
+          if (c.status == "Pending") {
             p[c.contact] = (p[c.contact] || 0) + 1;
           }
           return p;
@@ -185,6 +185,26 @@ export default defineComponent({
         });
 
         sortedContacts.map((c) => contactList.push(c.id));
+        return contactList;
+      } else if (sortContacts.value == "Urgent") {
+        const contactList = [];
+        // SORT BASED ON URGENT
+        const map = ints.reduce(function (p, c) {
+          if (c.status == "Urgent") {
+            p[c.contact] = (p[c.contact] || 0) + 1;
+          }
+          return p;
+        }, {});
+        var array = [];
+        for (var a in map) {
+          array.push({ k: a, count: map[a] });
+        }
+        array
+          .sort(function (a, b) {
+            return b.count - a.count;
+          })
+          .map((a) => contactList.push(a.k));
+        console.log("array sorted = ", array);
         return contactList;
       } else {
         // Default latest update first

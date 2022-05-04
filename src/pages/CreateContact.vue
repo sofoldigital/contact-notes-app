@@ -61,7 +61,6 @@ export default defineComponent({
         );
         error = intResponse.error;
       }
-      console.log("response = ", response);
       if (!error) {
         $q.notify({
           color: "positive",
@@ -77,7 +76,6 @@ export default defineComponent({
           icon: "error",
           message: error,
         });
-        console.log("error ", error);
       }
       loading.value = false;
     };

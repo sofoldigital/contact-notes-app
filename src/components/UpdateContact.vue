@@ -31,12 +31,19 @@
     <q-input filled v-model="email" label="Email" />
     <q-input filled v-model="fax" label="Fax" />
 
+    <div class="row">
+      <div class="col col-12">
+        <q-checkbox v-model="redFlag" color="red" label="Red Flag" />
+      </div>
+    </div>
+    <q-input filled autogrow v-model="notes" label="Contact Notes" />
+
     <div class="row justify-center">
       <q-btn
         label="Save"
         class="full-width"
         type="submit"
-        color="positive"
+        color="primary"
         :loading="loading"
       />
       <q-btn
@@ -87,6 +94,16 @@ export default {
       default: "",
     },
 
+    originalRedFlag: {
+      type: Boolean,
+      default: false,
+    },
+
+    originalNotes: {
+      type: String,
+      default: "",
+    },
+
     id: {
       type: String,
       default: null,
@@ -96,6 +113,8 @@ export default {
     const $store = useStore();
     const phone = ref(props.originalPhone);
     const email = ref(props.originalEmail);
+    const redFlag = ref(props.originalRedFlag);
+    const notes = ref(props.originalNotes);
     const fax = ref(props.originalFax);
     const errorLoading = ref(false);
     const updateError = (type) => {
@@ -144,6 +163,8 @@ export default {
           contactName: contactName.value,
           phone: phone.value,
           email: email.value,
+          notes: notes.value,
+          redFlag: redFlag.value,
           fax: fax.value,
           lastUpdate: Date.now(),
           imageUrl: imageUrl.value,
@@ -162,6 +183,8 @@ export default {
       validPhone,
       updateError,
       errorLoading,
+      notes,
+      redFlag,
       phone,
       onSubmit,
     };

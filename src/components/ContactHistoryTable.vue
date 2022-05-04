@@ -301,6 +301,11 @@ export default {
       if (val == "Reach Out") {
         return "purple";
       } else {
+        if (val == "Actioned") {
+          return "positive";
+        } else {
+          return val === "Pending" ? "warning" : "negative";
+        }
         return val == "Actioned" ? "positive" : "warning";
       }
     };

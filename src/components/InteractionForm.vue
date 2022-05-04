@@ -47,20 +47,19 @@
       :rules="[(val) => (val && val.length > 0) || 'Enter a contact message']"
     />
     <div class="row">
-      <div class="col col-12 col-sm-6" v-if="!reachOut">
+      <div class="col col-12 col-sm-4" v-if="!reachOut">
+        <q-checkbox v-model="actioned" label="Actioned" />
+      </div>
+      <div class="col col-12 col-sm-4" v-if="!reachOut">
         <q-checkbox
-          left-label
-          v-model="actioned"
-          label="Has this been Actioned?"
+          v-model="urgent"
+          :disable="actioned"
+          color="red"
+          label="Urgent"
         />
       </div>
-      <div class="col col-12 col-sm-6">
-        <q-checkbox
-          left-label
-          v-model="reachOut"
-          color="purple"
-          label="Reach out?"
-        />
+      <div class="col col-12 col-sm-4">
+        <q-checkbox v-model="reachOut" color="purple" label="Reach out" />
       </div>
     </div>
     <q-input
@@ -70,7 +69,9 @@
       v-model="actionTaken"
       label="Action Taken *"
       lazy-rules
-      :rules="[(val) => (val !== null && val !== '') || 'Enter a contact name']"
+      :rules="[
+        (val) => (val !== null && val !== '') || 'Summarise Action Taken',
+      ]"
     />
 
     <div class="row justify-center">
@@ -78,7 +79,7 @@
         label="Save"
         class="full-width"
         type="submit"
-        color="positive"
+        color="primary"
         :loading="loading"
       />
       <q-btn
@@ -93,7 +94,7 @@
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
@@ -129,6 +130,11 @@ export default {
       default: false,
     },
 
+    originalStatus: {
+      type: String,
+      default: "",
+    },
+
     id: {
       type: String,
       default: null,
@@ -147,21 +153,35 @@ export default {
 
     const reachOut = ref(props.originalReachOut);
 
+    const urgent = ref(props.originalStatus == "Urgent" ? true : false);
+
     const actioned = ref(props.originalActioned ? true : false);
 
     const id = ref(props.id ? true : false);
     const uid = computed(() => $store.state.users.user.uid);
 
-    const onSubmit = async () => {
+    watchEffect(() => {
+      if (actioned.value) {
+        urgent.value = false;
+      }
+    });
+    watchEffect(() => {
       if (reachOut.value) {
+        urgent.value = false;
         actionTaken.value = "";
         actioned.value = false;
       }
+    });
+    const onSubmit = async () => {
       const getStatus = () => {
         if (reachOut.value) {
           return "Reach Out";
         } else {
-          return actioned.value ? "Actioned" : "Pending";
+          if (actioned.value) {
+            return "Actioned";
+          } else {
+            return urgent.value ? "Urgent" : "Pending";
+          }
         }
       };
       context.emit("onSubmit", {
@@ -169,6 +189,7 @@ export default {
           typeOfContact: typeOfContact.value,
           message: message.value,
           actionTaken: actionTaken.value,
+          urgent: urgent.value,
           actioned: actioned.value,
           reachOut: reachOut.value,
           status: getStatus(),
@@ -189,6 +210,7 @@ export default {
       actioned,
       message,
       options,
+      urgent,
       actionTaken,
       reachOut,
       onSubmit,

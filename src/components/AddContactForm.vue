@@ -81,18 +81,25 @@
           ]"
         />
         <div class="row">
-          <div class="col col-12 col-sm-6">
-            <q-checkbox left-label v-model="actioned" label="Actioned" />
+          <div class="col col-12 col-sm-4" v-if="!reachOut">
+            <q-checkbox v-model="actioned" label="Actioned" />
           </div>
-          <!-- <div class="col col-12 col-sm-6">
+          <div class="col col-12 col-sm-4" v-if="!reachOut">
             <q-checkbox
-              left-label
               :disable="actioned"
               v-model="urgent"
               color="red"
               label="Urgent"
             />
-          </div> -->
+          </div>
+          <div class="col col-12 col-sm-4">
+            <q-checkbox
+              :disable="actioned"
+              v-model="reachOut"
+              color="purple"
+              label="Reach Out"
+            />
+          </div>
         </div>
         <q-input
           v-if="actioned"
@@ -103,7 +110,7 @@
           label="Action Taken *"
           lazy-rules
           :rules="[
-            (val) => (val !== null && val !== '') || 'Enter a contact name',
+            (val) => (val !== null && val !== '') || 'Summarise Action Taken',
           ]"
         />
       </q-card-section>
@@ -112,12 +119,19 @@
     <q-input filled v-model="email" label="Email" />
     <q-input filled v-model="fax" label="Fax" />
 
+    <div class="row">
+      <div class="col col-12">
+        <q-checkbox v-model="redFlag" color="red" label="Red Flag" />
+      </div>
+    </div>
+    <q-input filled autogrow v-model="notes" label="Contact Notes" />
+
     <div class="row justify-center">
       <q-btn
         label="Save"
         class="full-width"
         type="submit"
-        color="positive"
+        color="primary"
         :loading="loading"
       />
       <q-btn
@@ -180,6 +194,8 @@ export default {
     const fax = ref(props.originalFax);
     const errorLoading = ref(false);
     const typeOfContact = ref("call");
+    const notes = ref("");
+    const redFlag = ref(false);
     const showInteraction = ref(true);
     const message = ref("");
     const actioned = ref(false);
@@ -196,6 +212,12 @@ export default {
     watchEffect(() => {
       if (actioned.value) {
         urgent.value = false;
+      }
+    });
+    watchEffect(() => {
+      if (reachOut.value) {
+        urgent.value = false;
+        actioned.value = false;
       }
     });
     const isAdmin = computed(() => {
@@ -247,6 +269,8 @@ export default {
           contactName: contactName.value,
           phone: phone.value,
           email: email.value,
+          notes: notes.value,
+          redFlag: redFlag.value,
           fax: fax.value,
           lastUpdate: Date.now(),
           imageUrl: imageUrl.value,
@@ -289,7 +313,10 @@ export default {
       updateError,
       message,
       errorLoading,
+      redFlag,
+      notes,
       typeOfContact,
+      reachOut,
       phone,
       showInteraction,
       onSubmit,
