@@ -1,8 +1,22 @@
 <template>
   <q-page padding>
+    <!-- <q-page-sticky
+      style="z-index: 3000"
+      position="top-right"
+      :offset="[10, -30]"
+    >
+      <q-fab
+        label="New Contact"
+        label-position="left"
+        icon="add"
+        color="white"
+        text-color="primary"
+        @click="$router.push({ name: 'Add Contact', query: { phone: phone } })"
+      />
+    </q-page-sticky> -->
     <!-- PHONE NUMBER SEARCH -->
     <div class="row justify-around q-gutter-sm">
-      <div class="col-12 col-sm-3">
+      <div class="col-12 col-md-2">
         <q-select
           v-model="sortContacts"
           style="width: 200px; max-width: 95%"
@@ -11,7 +25,7 @@
           label="Sort by"
         />
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-md-3">
         <q-input
           v-model="phone"
           label="Phone"
@@ -34,7 +48,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-md-3">
         <q-input
           v-model="textSearch"
           label="Search"
@@ -55,6 +69,20 @@
             <q-icon name="search" />
           </template>
         </q-input>
+      </div>
+      <div class="col-12 col-md-3">
+        <q-select
+          clearable
+          style="width: 250px; max-width: 95%"
+          class="q-mx-auto q-mb-md"
+          v-model="assigneeSearch"
+          :options="userOptions"
+          label="Assignee"
+        >
+          <template v-slot:prepend>
+            <q-icon name="person_search" @click.stop />
+          </template>
+        </q-select>
       </div>
     </div>
     <div v-if="filteredContacts.length > 0" class="full-width q-mt-none">
@@ -101,10 +129,28 @@ export default defineComponent({
     console.log("setup", $store.state.contacts);
 
     const phone = ref("");
+    const assigneeSearch = ref(null);
 
     const sortContacts = ref("Recent Updates");
 
     const textSearch = ref("");
+
+    const userOptions = computed(() => {
+      const users = $store.state.users.profiles;
+      const transformedUsers = [
+        {
+          label: "Unassigned",
+          value: "",
+        },
+      ];
+      users.forEach((user) => {
+        transformedUsers.push({
+          label: user.displayName,
+          value: user.id,
+        });
+      });
+      return transformedUsers;
+    });
 
     if ($router.currentRoute.value.query.phone) {
       phone.value = $router.currentRoute.value.query.phone;
@@ -138,6 +184,30 @@ export default defineComponent({
       }
     });
 
+    const contactsWithAssignee = computed(() => {
+      const searchValue = assigneeSearch.value;
+      const validContacts = [];
+      if (searchValue) {
+        $store.state.contacts.contacts.forEach((x) => {
+          if (x.assignee) {
+            console.log("search value.value", searchValue.value);
+            if (x.assignee == searchValue.value) {
+              validContacts.push(x.id);
+            }
+          } else {
+            if (searchValue.value === "") {
+              validContacts.push(x.id);
+            }
+          }
+        });
+        console.log("valid contacts = ", validContacts);
+        return validContacts;
+      } else {
+        $store.state.contacts.contacts.forEach((c) => validContacts.push(c.id));
+        return validContacts;
+      }
+    });
+
     const filteredContacts = computed(() => {
       const sortedContacts = [...contactSorted.value];
       contacts.value.forEach((o) => {
@@ -149,7 +219,10 @@ export default defineComponent({
       const searchValue = phone.value;
       const regexp = new RegExp(searchValue, "i");
       let filteredResults = result.sort().filter((x) => {
-        if (interactionsWithSearchText.value.some((id) => id === x.id)) {
+        if (
+          interactionsWithSearchText.value.some((id) => id === x.id) &&
+          contactsWithAssignee.value.some((id) => id === x.id)
+        ) {
           return regexp.test(x.phone);
         }
       });
@@ -216,29 +289,6 @@ export default defineComponent({
         sortedContacts.map((c) => contactList.push(c.id));
         return contactList;
       }
-
-      // if (sortContacts.value == "Oldest") {
-
-      //   const sortedInts = ints.sort(function (a, b) {
-      //     // Turn your strings into dates, and then subtract them
-      //     // to get a value that is either negative, positive, or zero.
-      //     return new Date(a.contactDate) - new Date(b.contactDate);
-      //   });
-      //   sortedInts.forEach((a) => contactList.push(a.contact));
-      //   return contactList;
-      // } else
-
-      // } else {
-      //   const contactList = [];
-      //   const sortedInts = ints.sort(function (a, b) {
-      //     // Turn your strings into dates, and then subtract them
-      //     // to get a value that is either negative, positive, or zero.
-      //     return new Date(b.contactDate) - new Date(a.contactDate);
-      //   });
-      //   sortedInts.forEach((a) => contactList.push(a.contact));
-      //   console.log("sorted list = ", contactList);
-      //   return contactList;
-      // }
     });
     const exportData = () => {
       const filename = "data.json";
@@ -258,7 +308,10 @@ export default defineComponent({
     return {
       textSearch,
       exportData,
+      userOptions,
+      assigneeSearch,
       sortContacts,
+      contactsWithAssignee,
       phone,
       filteredContacts,
     };

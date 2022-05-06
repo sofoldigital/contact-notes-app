@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="flex flex-center">
-    <q-card style="min-width: 70%; width: 350px">
+    <q-card style="min-width: 75%; width: 350px">
       <q-card-section class="text-h6 text-white text-center bg-primary">
         Create Contact
       </q-card-section>

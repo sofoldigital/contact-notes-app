@@ -1,42 +1,50 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
-    <div class="text-center">
-      <q-btn-toggle
-        v-model="typeOfContact"
-        class="my-custom-toggle"
-        no-caps
-        rounded
-        unelevated
-        toggle-color="primary"
-        color="white"
-        text-color="primary"
-        :options="options"
-      >
-        <template v-slot:call>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="call" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">Call</div>
-          </div>
-        </template>
-        <template v-slot:sms>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="sms" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">SMS</div>
-          </div>
-        </template>
-        <template v-slot:mail>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="mail" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">Email</div>
-          </div>
-        </template>
-        <template v-slot:fax>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="fax" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">Fax</div>
-          </div>
-        </template>
-      </q-btn-toggle>
+    <div class="row items-center">
+      <div class="col col-12 col-md-8 q-mt-md">
+        <q-btn-toggle
+          v-model="typeOfContact"
+          class="my-custom-toggle"
+          no-caps
+          rounded
+          unelevated
+          toggle-color="primary"
+          color="white"
+          text-color="primary"
+          :options="options"
+        >
+          <template v-slot:call>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="call" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Phone</div>
+            </div>
+          </template>
+          <template v-slot:mobile>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="phone_android" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Mobile</div>
+            </div>
+          </template>
+          <template v-slot:sms>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="sms" />
+              <div class="text-center" v-if="!$q.screen.lt.md">SMS</div>
+            </div>
+          </template>
+          <template v-slot:mail>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="mail" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Email</div>
+            </div>
+          </template>
+          <template v-slot:fax>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="fax" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Fax</div>
+            </div>
+          </template>
+        </q-btn-toggle>
+      </div>
     </div>
     <q-input
       filled
@@ -200,6 +208,7 @@ export default {
 
     const options = ref([
       { value: "call", slot: "call" },
+      { value: "mobile", slot: "mobile" },
       { value: "sms", slot: "sms" },
       { value: "email", slot: "mail" },
       { value: "fax", slot: "fax" },

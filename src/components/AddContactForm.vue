@@ -6,33 +6,49 @@
         <q-icon name="error"></q-icon>
       </q-avatar>
     </div>
-    <q-input
-      filled
-      v-model="phone"
-      label="Phone *"
-      lazy-rules
-      :rules="[
-        (val) => (val && val.length > 0) || 'Enter a contact phone',
-        (val) =>
-          validPhone ||
-          'Enter a valid phone (starting with 0, 18, 13 without spaces)',
-        () => !phoneExists || 'Contact already exists',
-      ]"
-    />
-    <q-input
-      filled
-      v-model="contactName"
-      label="Name *"
-      lazy-rules
-      :rules="[(val) => (val !== null && val !== '') || 'Enter a contact name']"
-    />
+    <div class="row items-center">
+      <div class="col col-12 col-md-5 q-mt-md q-mr-sm">
+        <q-input
+          filled
+          v-model="contactName"
+          label="Name *"
+          lazy-rules
+          :rules="[
+            (val) => (val !== null && val !== '') || 'Enter a contact name',
+          ]"
+        />
+      </div>
+      <div class="col col-12 col-md-5 q-mt-md q-mr-sm">
+        <q-input
+          filled
+          v-model="phone"
+          label="Phone *"
+          lazy-rules
+          :rules="[
+            (val) => (val && val.length > 0) || 'Enter a contact phone',
+            (val) =>
+              validPhone ||
+              'Enter a valid phone (starting with 0, 18, 13 without spaces)',
+            () => !phoneExists || 'Contact already exists',
+          ]"
+        />
+      </div>
+      <div class="col col-12 col-md-5 q-mt-md">
+        <q-select
+          filled
+          v-model="assignee"
+          :options="userOptions"
+          label="Assignee"
+        />
+      </div>
+    </div>
     <q-toggle v-model="showInteraction" label="Add Interaction" />
     <q-card bordered flat v-if="showInteraction">
       <q-card-section>
         <q-item-label caption>Interaction Details</q-item-label>
       </q-card-section>
       <q-card-section>
-        <div class="text-center q-mb-md">
+        <div class="row items-center justify-center q-mb-md">
           <q-btn-toggle
             v-model="typeOfContact"
             class="my-custom-toggle"
@@ -46,26 +62,32 @@
           >
             <template v-slot:call>
               <div class="row items-center no-wrap">
-                <q-icon class="q-mr-xs" name="call" v-if="!$q.screen.lt.sm" />
-                <div class="text-center">Call</div>
+                <q-icon class="q-mr-xs" name="call" />
+                <div class="text-center" v-if="!$q.screen.lt.md">Phone</div>
+              </div>
+            </template>
+            <template v-slot:mobile>
+              <div class="row items-center no-wrap">
+                <q-icon class="q-mr-xs" name="phone_android" />
+                <div class="text-center" v-if="!$q.screen.lt.md">Mobile</div>
               </div>
             </template>
             <template v-slot:sms>
               <div class="row items-center no-wrap">
-                <q-icon class="q-mr-xs" name="sms" v-if="!$q.screen.lt.sm" />
-                <div class="text-center">SMS</div>
+                <q-icon class="q-mr-xs" name="sms" />
+                <div class="text-center" v-if="!$q.screen.lt.md">SMS</div>
               </div>
             </template>
             <template v-slot:mail>
               <div class="row items-center no-wrap">
-                <q-icon class="q-mr-xs" name="mail" v-if="!$q.screen.lt.sm" />
-                <div class="text-center">Email</div>
+                <q-icon class="q-mr-xs" name="mail" />
+                <div class="text-center" v-if="!$q.screen.lt.md">Email</div>
               </div>
             </template>
             <template v-slot:fax>
               <div class="row items-center no-wrap">
-                <q-icon class="q-mr-xs" name="fax" v-if="!$q.screen.lt.sm" />
-                <div class="text-center">Fax</div>
+                <q-icon class="q-mr-xs" name="fax" />
+                <div class="text-center" v-if="!$q.screen.lt.md">Fax</div>
               </div>
             </template>
           </q-btn-toggle>
@@ -202,6 +224,8 @@ export default {
     const actionTaken = ref("");
     const reachOut = ref(false);
     const urgent = ref(false);
+    const assignee = ref({ label: "Unassigned", value: "" });
+
     const updateError = (type) => {
       if (type == "error") {
         errorLoading.value = true;
@@ -251,6 +275,7 @@ export default {
         return false;
       }
     });
+
     const getStatus = () => {
       if (reachOut.value) {
         return "Reach Out";
@@ -263,12 +288,30 @@ export default {
       }
     };
 
+    const userOptions = computed(() => {
+      const users = $store.state.users.profiles;
+      const transformedUsers = [
+        {
+          label: "Unassigned",
+          value: "",
+        },
+      ];
+      users.forEach((user) => {
+        transformedUsers.push({
+          label: user.displayName,
+          value: user.id,
+        });
+      });
+      return transformedUsers;
+    });
+
     const onSubmit = async () => {
       const payload = {
         contact: {
           contactName: contactName.value,
           phone: phone.value,
           email: email.value,
+          assignee: assignee.value.value,
           notes: notes.value,
           redFlag: redFlag.value,
           fax: fax.value,
@@ -293,6 +336,7 @@ export default {
 
     const options = ref([
       { value: "call", slot: "call" },
+      { value: "mobile", slot: "mobile" },
       { value: "sms", slot: "sms" },
       { value: "email", slot: "mail" },
       { value: "fax", slot: "fax" },
@@ -307,6 +351,8 @@ export default {
       isAdmin,
       phoneExists,
       validPhone,
+      userOptions,
+      assignee,
       actioned,
       actionTaken,
       urgent,

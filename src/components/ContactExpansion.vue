@@ -49,9 +49,16 @@
           <q-item-label caption v-if="fax">
             <q-icon name="fax" class="q-mr-sm"></q-icon><span>{{ fax }}</span>
           </q-item-label>
-          <q-item-label caption>
-            <span></span>
-          </q-item-label>
+          <q-item-label class="items-center" v-if="assignee">
+            <q-chip>
+              <q-avatar
+                icon="assignment_ind"
+                color="primary"
+                text-color="white"
+              />
+              {{ assigneeName }}
+            </q-chip></q-item-label
+          >
         </q-item-section>
         <q-item-section side class="text-right text-caption">
           <q-chip color="negative" class="text-white" v-if="numberOfUrgent > 0">
@@ -109,6 +116,11 @@ export default {
     },
 
     imageUrl: {
+      type: String,
+      default: "",
+    },
+
+    assignee: {
       type: String,
       default: "",
     },
@@ -171,6 +183,22 @@ export default {
       });
       return pendingActions.length;
     });
+
+    const assigneeName = computed(() => {
+      const users = $store.state.users.profiles;
+      if (props.assignee != "") {
+        const user = users.find((u) => u.id === props.assignee);
+        console.log("user = ", user);
+        if (user) {
+          return user.displayName;
+        } else {
+          return "Unassigned";
+        }
+      } else {
+        return "Unassigned";
+      }
+    });
+
     const isAdmin = computed(() => {
       const uid = $store.state.users.user.uid;
       const profile = $store.state.users.profiles.find((p) => p.id === uid);
@@ -196,6 +224,7 @@ export default {
       resetImage,
       formattedDate,
       updatedImageUrl,
+      assigneeName,
       isAdmin,
       numberOfUrgent,
       expanded,

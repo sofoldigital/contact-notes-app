@@ -6,27 +6,42 @@
         <q-icon name="error"></q-icon>
       </q-avatar>
     </div>
-    <q-input
-      filled
-      v-model="phone"
-      label="Phone *"
-      lazy-rules
-      :rules="[
-        (val) => (val && val.length > 0) || 'Enter a contact phone',
-        (val) =>
-          validPhone ||
-          'Enter a valid phone (starting with 0, 18, 13 without spaces)',
-        () => !phoneExists || 'Contact already exists',
-      ]"
-    />
-
-    <q-input
-      filled
-      v-model="contactName"
-      label="Name *"
-      lazy-rules
-      :rules="[(val) => (val !== null && val !== '') || 'Enter a contact name']"
-    />
+    <div class="row items-center">
+      <div class="col col-12 col-md-5 q-mt-md q-mr-sm">
+        <q-input
+          filled
+          v-model="contactName"
+          label="Name *"
+          lazy-rules
+          :rules="[
+            (val) => (val !== null && val !== '') || 'Enter a contact name',
+          ]"
+        />
+      </div>
+      <div class="col col-12 col-md-5 q-mt-md q-mr-sm">
+        <q-input
+          filled
+          v-model="phone"
+          label="Phone *"
+          lazy-rules
+          :rules="[
+            (val) => (val && val.length > 0) || 'Enter a contact phone',
+            (val) =>
+              validPhone ||
+              'Enter a valid phone (starting with 0, 18, 13 without spaces)',
+            () => !phoneExists || 'Contact already exists',
+          ]"
+        />
+      </div>
+      <div class="col col-12 col-md-5 q-mt-md">
+        <q-select
+          filled
+          v-model="assignee"
+          :options="userOptions"
+          label="Assignee"
+        />
+      </div>
+    </div>
     <q-input filled v-model="imageUrl" label="Image URL" v-if="isAdmin" />
     <q-input filled v-model="email" label="Email" />
     <q-input filled v-model="fax" label="Fax" />
@@ -89,6 +104,11 @@ export default {
       default: "",
     },
 
+    originalAssignee: {
+      type: String,
+      default: "",
+    },
+
     originalName: {
       type: String,
       default: "",
@@ -116,6 +136,40 @@ export default {
     const redFlag = ref(props.originalRedFlag);
     const notes = ref(props.originalNotes);
     const fax = ref(props.originalFax);
+
+    const getLabel = (id) => {
+      if (id === "") {
+        return "Unassigned";
+      } else {
+        const profile = $store.state.users.profiles.find((p) => p.id === id);
+        if (profile) {
+          return profile.displayName;
+        } else {
+          return "Unassigned";
+        }
+      }
+    };
+    const assignee = ref({
+      value: props.originalAssignee,
+      label: getLabel(props.originalAssignee),
+    });
+
+    const userOptions = computed(() => {
+      const users = $store.state.users.profiles;
+      const transformedUsers = [
+        {
+          label: "Unassigned",
+          value: "",
+        },
+      ];
+      users.forEach((user) => {
+        transformedUsers.push({
+          label: user.displayName,
+          value: user.id,
+        });
+      });
+      return transformedUsers;
+    });
     const errorLoading = ref(false);
     const updateError = (type) => {
       if (type == "error") {
@@ -164,6 +218,7 @@ export default {
           phone: phone.value,
           email: email.value,
           notes: notes.value,
+          assignee: assignee.value.value,
           redFlag: redFlag.value,
           fax: fax.value,
           lastUpdate: Date.now(),
@@ -184,6 +239,8 @@ export default {
       updateError,
       errorLoading,
       notes,
+      userOptions,
+      assignee,
       redFlag,
       phone,
       onSubmit,

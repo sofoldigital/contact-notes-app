@@ -22,6 +22,11 @@
           :originalPhone="originalContact.phone"
           :originalName="originalContact.contactName"
           :originalFax="originalContact.fax"
+          :originalAssignee="
+            typeof originalContact.assignee === 'undefined'
+              ? ''
+              : originalContact.assignee
+          "
           :originalEmail="originalContact.email"
           :originalImageUrl="originalContact.imageUrl"
           :originalNotes="
