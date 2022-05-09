@@ -1,19 +1,23 @@
 <template>
-  <q-page padding>
-    <!-- <q-page-sticky
+  <q-page padding v-if="profile">
+    <q-page-sticky
       style="z-index: 3000"
       position="top-right"
-      :offset="[10, -30]"
+      :offset="[15, -40]"
     >
-      <q-fab
-        label="New Contact"
-        label-position="left"
-        icon="add"
-        color="white"
-        text-color="primary"
-        @click="$router.push({ name: 'Add Contact', query: { phone: phone } })"
-      />
-    </q-page-sticky> -->
+      <span
+        class="text-white text-subtitle1"
+        v-if="contacts && permissionContacts && specificMatch.length < 1"
+        >Showing {{ filteredContacts.length }} of
+        {{ contacts.length }} contacts</span
+      >
+      <span
+        class="text-white text-subtitle1"
+        v-if="contacts && permissionContacts && specificMatch.length >= 1"
+        >Showing {{ specificMatch.length }} of
+        {{ contacts.length }} contacts</span
+      >
+    </q-page-sticky>
     <!-- PHONE NUMBER SEARCH -->
     <div class="row justify-around q-gutter-sm">
       <div class="col-12 col-md-2">
@@ -85,7 +89,10 @@
         </q-select>
       </div>
     </div>
-    <div v-if="filteredContacts.length > 0" class="full-width q-mt-none">
+    <div
+      v-if="filteredContacts.length > 0 && specificMatch.length === 0"
+      class="full-width q-mt-none"
+    >
       <ContactExpansion
         v-for="contact in filteredContacts"
         :key="contact.id"
@@ -94,7 +101,18 @@
         :phoneSearch="phone"
       ></ContactExpansion>
     </div>
-    <div v-if="filteredContacts.length == 0" class="text-center">
+    <div v-if="specificMatch.length > 0" class="full-width q-mt-none">
+      <ContactExpansion
+        v-for="contact in specificMatch"
+        :key="contact.id"
+        v-bind="contact"
+        :phoneSearch="phone"
+      ></ContactExpansion>
+    </div>
+    <div
+      v-if="filteredContacts.length == 0 && specificMatch.length == 0"
+      class="text-center"
+    >
       No contacts found...
     </div>
     <div class="text-center q-mt-md">
@@ -124,15 +142,12 @@ export default defineComponent({
   },
   setup() {
     const $store = useStore();
-
     const $router = useRouter();
-    console.log("setup", $store.state.contacts);
 
+    //SEARCH / SORT Values
     const phone = ref("");
     const assigneeSearch = ref(null);
-
     const sortContacts = ref("Recent Updates");
-
     const textSearch = ref("");
 
     const userOptions = computed(() => {
@@ -158,9 +173,10 @@ export default defineComponent({
 
     const interactions = computed(() => $store.state.interactions.interactions);
 
-    const contacts = computed(() => {
-      return $store.getters["contacts/getContacts"];
-    });
+    const contacts = computed(() => $store.getters["contacts/getContacts"]);
+    const permissionContacts = computed(
+      () => $store.getters["contacts/getPermissionContacts"]
+    );
 
     const interactionsWithSearchText = computed(() => {
       const searchValue = textSearch.value;
@@ -172,14 +188,14 @@ export default defineComponent({
             validContacts.push(x.contact);
           }
         });
-        contacts.value.forEach((c) => {
+        permissionContacts.value.forEach((c) => {
           if (regexp.test(c.contactName)) {
             validContacts.push(c.id);
           }
         });
         return validContacts;
       } else {
-        $store.state.contacts.contacts.forEach((c) => validContacts.push(c.id));
+        permissionContacts.value.forEach((c) => validContacts.push(c.id));
         return validContacts;
       }
     });
@@ -188,9 +204,8 @@ export default defineComponent({
       const searchValue = assigneeSearch.value;
       const validContacts = [];
       if (searchValue) {
-        $store.state.contacts.contacts.forEach((x) => {
+        permissionContacts.value.forEach((x) => {
           if (x.assignee) {
-            console.log("search value.value", searchValue.value);
             if (x.assignee == searchValue.value) {
               validContacts.push(x.id);
             }
@@ -200,20 +215,19 @@ export default defineComponent({
             }
           }
         });
-        console.log("valid contacts = ", validContacts);
         return validContacts;
       } else {
-        $store.state.contacts.contacts.forEach((c) => validContacts.push(c.id));
+        permissionContacts.value.forEach((c) => validContacts.push(c.id));
         return validContacts;
       }
     });
 
     const filteredContacts = computed(() => {
       const sortedContacts = [...contactSorted.value];
-      contacts.value.forEach((o) => {
+      permissionContacts.value.forEach((o) => {
         if (!sortedContacts.includes(o.id)) sortedContacts.push(o.id);
       });
-      let result = [...contacts.value].sort((a, b) => {
+      let result = [...permissionContacts.value].sort((a, b) => {
         return sortedContacts.indexOf(a.id) - sortedContacts.indexOf(b.id);
       });
       const searchValue = phone.value;
@@ -253,7 +267,10 @@ export default defineComponent({
         return contactList;
       } else if (sortContacts.value == "Oldest") {
         const contactList = [];
-        const sortedContacts = [...contacts.value].sort(function (a, b) {
+        const sortedContacts = [...permissionContacts.value].sort(function (
+          a,
+          b
+        ) {
           return new Date(a.lastUpdate) - new Date(b.lastUpdate);
         });
 
@@ -290,6 +307,7 @@ export default defineComponent({
         return contactList;
       }
     });
+
     const exportData = () => {
       const filename = "data.json";
       const jsonStr = JSON.stringify(filteredContacts.value, null, 4);
@@ -305,14 +323,64 @@ export default defineComponent({
       document.body.removeChild(element);
     };
 
+    const specificMatch = computed(() => {
+      let index, nameIndex;
+      const foundContacts = [];
+      const foundMatch = contacts.value.some((c, i) => {
+        if (c.phone === phone.value) {
+          index = i;
+          return c;
+        }
+      });
+      const foundName = contacts.value.some((c, i) => {
+        if (c.contactName.toLowerCase() == textSearch.value.toLowerCase()) {
+          nameIndex = i;
+          return c;
+        }
+      });
+      if (foundMatch) {
+        foundContacts.push(contacts.value[index]);
+      }
+      if (foundName) {
+        foundContacts.push(contacts.value[nameIndex]);
+      }
+
+      if (foundMatch || foundName) {
+        console.log(
+          "filtered",
+          filteredContacts.value.length,
+          "found",
+          foundContacts.length,
+          filteredContacts.value
+        );
+        if (foundContacts.length <= filteredContacts.value.length) {
+          return filteredContacts.value;
+        } else {
+          if (profile.value.viewSpecific) {
+            return foundContacts;
+          } else {
+            return [];
+          }
+        }
+      } else {
+        return [];
+      }
+    });
+
+    const profile = computed(() => $store.state.users.profile);
+
     return {
       textSearch,
       exportData,
+      specificMatch,
       userOptions,
+      contacts,
+      profile,
       assigneeSearch,
       sortContacts,
       contactsWithAssignee,
       phone,
+      permissionContacts,
       filteredContacts,
     };
   },

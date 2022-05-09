@@ -7,6 +7,7 @@
           <q-item-section side
             ><q-btn
               round
+              v-if="profile.deleteAccess"
               color="negative"
               icon="delete"
               @click="confirm = true"
@@ -98,6 +99,7 @@ export default defineComponent({
         (i) => i.id === $router.currentRoute.value.params.id
       ),
     };
+    const profile = computed(() => $store.state.users.profile);
     const confirm = ref(false);
     const loading = ref(false);
     const deleteLoading = ref(false);
@@ -142,7 +144,6 @@ export default defineComponent({
         id: $router.currentRoute.value.params.id,
         interactions: contactInteractions.value,
       };
-      console.log("payload", payload);
 
       const response = await $store.dispatch("contacts/deleteContact", payload);
       if (!response.error) {
@@ -167,6 +168,7 @@ export default defineComponent({
       createContact,
       loading,
       deleteLoading,
+      profile,
       originalContact,
       deleteContact,
       confirm,

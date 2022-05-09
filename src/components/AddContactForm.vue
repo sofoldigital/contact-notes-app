@@ -1,10 +1,22 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
-    <div class="row">
-      <q-avatar size="100px" v-if="imageUrl && isAdmin" class="q-mx-auto">
-        <img :src="imageUrl" />
-        <q-icon name="error"></q-icon>
+    <div class="row justify-center">
+      <q-avatar
+        size="100px"
+        v-if="imageUrl && profile.contactImages"
+        v-show="!imageError"
+        class="q-mx-auto"
+      >
+        <img :src="imageUrl" :onerror="resetImage" :onload="removeError" />
       </q-avatar>
+      <q-avatar
+        v-if="!imageUrl || imageError"
+        round="round"
+        color="grey"
+        size="100px"
+        icon="person"
+        text-color="white"
+      ></q-avatar>
     </div>
     <div class="row items-center">
       <div class="col col-12 col-md-5 q-mt-md q-mr-sm">
@@ -137,7 +149,12 @@
         />
       </q-card-section>
     </q-card>
-    <q-input filled v-model="imageUrl" label="Image URL" v-if="isAdmin" />
+    <q-input
+      filled
+      v-model="imageUrl"
+      label="Image URL"
+      v-if="profile.contactImages"
+    />
     <q-input filled v-model="email" label="Email" />
     <q-input filled v-model="fax" label="Fax" />
 
@@ -226,6 +243,8 @@ export default {
     const urgent = ref(false);
     const assignee = ref({ label: "Unassigned", value: "" });
 
+    const imageError = ref(true);
+
     const updateError = (type) => {
       if (type == "error") {
         errorLoading.value = true;
@@ -244,17 +263,12 @@ export default {
         actioned.value = false;
       }
     });
-    const isAdmin = computed(() => {
-      const uid = $store.state.users.user.uid;
-      const profile = $store.state.users.profiles.find((p) => p.id === uid);
-      return profile.admin;
-    });
+    const profile = computed(() => $store.state.users.profile);
     const contactName = ref(props.originalName);
-    const imageUrl = ref(props.originalImageUrl);
+    const imageUrl = ref("");
     const id = ref(props.id);
     const phoneExists = computed(() => {
       if (!id.value) {
-        console.log("original phone", props.originalPhone);
         return $store.state.contacts.contacts.some(
           (c) => c.phone === phone.value
         );
@@ -289,7 +303,7 @@ export default {
     };
 
     const userOptions = computed(() => {
-      const users = $store.state.users.profiles;
+      const users = $store.state.users.activeProfiles;
       const transformedUsers = [
         {
           label: "Unassigned",
@@ -316,7 +330,7 @@ export default {
           redFlag: redFlag.value,
           fax: fax.value,
           lastUpdate: Date.now(),
-          imageUrl: imageUrl.value,
+          imageUrl: imageError.value ? "" : imageUrl.value,
         },
         interaction: null,
         id: id.value,
@@ -342,13 +356,24 @@ export default {
       { value: "fax", slot: "fax" },
     ]);
 
+    const resetImage = () => {
+      imageError.value = true;
+    };
+
+    const removeError = () => {
+      imageError.value = false;
+    };
+
     return {
       email,
       contactName,
       options,
+      imageError,
       imageUrl,
+      resetImage,
+      removeError,
       fax,
-      isAdmin,
+      profile,
       phoneExists,
       validPhone,
       userOptions,

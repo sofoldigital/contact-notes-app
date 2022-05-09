@@ -53,7 +53,7 @@
         </q-td>
         <q-td key="createdByName" :props="props">
           <div>
-            {{ props.row.createdByName }}
+            {{ getProfileName(props.row.createdBy) }}
           </div>
         </q-td>
         <q-td key="message" :props="props">

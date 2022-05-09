@@ -39,7 +39,6 @@ export default defineComponent({
     );
     const createContact = async (ev) => {
       loading.value = true;
-      console.log("ev", ev);
       const { contact, interaction } = ev;
       const currentDate = new Date().toISOString();
       contact.lastUpdate = currentDate;

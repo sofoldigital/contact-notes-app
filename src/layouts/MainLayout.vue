@@ -8,7 +8,7 @@
       </q-toolbar>
     </q-header>
     <q-drawer
-      v-if="showToolBar"
+      v-if="showToolBar && profile"
       :mini="miniState"
       @mouseover="miniState = false"
       @mouseout="miniState = true"
@@ -27,13 +27,13 @@
             <q-item-section> Contacts </q-item-section>
           </q-item>
 
-          <q-item>
+          <!-- <q-item>
             <q-item-section avatar>
               <q-icon name="event" />
             </q-item-section>
 
             <q-item-section> Calendar </q-item-section>
-          </q-item>
+          </q-item> -->
 
           <q-item clickable v-ripple :to="{ name: 'Profile' }">
             <q-item-section avatar>
@@ -41,11 +41,16 @@
             </q-item-section>
             <q-item-section> My Profile </q-item-section>
           </q-item>
-          <q-item clickable v-ripple :to="{ name: 'Management' }">
+          <q-item
+            clickable
+            v-ripple
+            :to="{ name: 'Management' }"
+            v-if="profile.admin"
+          >
             <q-item-section avatar>
               <q-icon name="manage_accounts" />
             </q-item-section>
-            <q-item-section> User Management </q-item-section>
+            <q-item-section> Admin</q-item-section>
           </q-item>
         </q-list>
         <q-item clickable v-ripple class="q-mb-lg" @click="logOut">
@@ -95,9 +100,10 @@ export default defineComponent({
     $store.commit("contacts/setLoading", true);
     $store.commit("users/setLoading", true);
     $store.commit("interactions/setLoading", true);
-    $store.dispatch("contacts/fetchContacts");
+    $store.dispatch("contacts/fetchSettings");
     $store.dispatch("users/fetchProfiles");
     $store.dispatch("interactions/fetchInteractions");
+    $store.dispatch("users/updateEmail");
 
     const contactsLoading = computed(() => $store.state.contacts.loading);
     const interactionsLoading = computed(

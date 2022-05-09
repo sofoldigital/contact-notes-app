@@ -12,6 +12,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const storageRef = firebase.storage().ref();
 const storageTask = firebase.storage.TaskEvent;
-const functions = firebase.app().functions("australia-southeast1");
+const functions = firebase.app().functions();
 
 export { auth, db, storageRef, storageTask, functions };

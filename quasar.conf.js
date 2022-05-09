@@ -44,6 +44,7 @@ module.exports = configure(function (ctx) {
     build: {
       vueRouterMode: "hash", // available values: 'hash', 'history'
       env: {
+        redirectUrl: "https://contact-notes-app.web.app/#/",
         firebaseConfig: {
           apiKey: "AIzaSyDz9U5vCkcQaOFn9XpMxrrttPnGVCZ3eZ4",
           authDomain: "contact-notes-app.firebaseapp.com",

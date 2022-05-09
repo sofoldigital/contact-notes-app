@@ -5,12 +5,13 @@
     style="border-radius: 30px"
     expand-icon-class="text-primary"
     v-model="expanded"
+    v-if="profile"
   >
     <template v-slot:header>
       <q-item dense class="full-width q-pl-none">
         <q-item-section avatar>
           <q-avatar
-            class="bg-grey"
+            class="bg-grey shadow-2"
             :size="!$q.screen.lt.sm ? '80px' : '50px'"
             @click="
               $router.push({
@@ -22,9 +23,8 @@
             "
           >
             <img
-              v-if="updatedImageUrl && isAdmin"
+              v-if="updatedImageUrl && profile.contactImages"
               :src="updatedImageUrl"
-              :onerror="resetImage"
             />
             <q-icon v-else name="person" class="text-white"></q-icon>
             <q-badge
@@ -51,12 +51,17 @@
           </q-item-label>
           <q-item-label class="items-center" v-if="assignee">
             <q-chip>
+              <q-avatar v-if="assigneeDetails.imageUrl">
+                <img :src="assigneeDetails.imageUrl" />
+              </q-avatar>
               <q-avatar
-                icon="assignment_ind"
+                v-else
+                round="round"
                 color="primary"
                 text-color="white"
-              />
-              {{ assigneeName }}
+                >{{ avatarInitials }}</q-avatar
+              >
+              {{ assigneeDetails.displayName }}
             </q-chip></q-item-label
           >
         </q-item-section>
@@ -184,26 +189,29 @@ export default {
       return pendingActions.length;
     });
 
-    const assigneeName = computed(() => {
+    const assigneeDetails = computed(() => {
       const users = $store.state.users.profiles;
       if (props.assignee != "") {
         const user = users.find((u) => u.id === props.assignee);
-        console.log("user = ", user);
         if (user) {
-          return user.displayName;
+          return user;
         } else {
-          return "Unassigned";
+          return null;
         }
       } else {
-        return "Unassigned";
+        return null;
       }
     });
 
-    const isAdmin = computed(() => {
-      const uid = $store.state.users.user.uid;
-      const profile = $store.state.users.profiles.find((p) => p.id === uid);
-      return profile.admin;
+    const avatarInitials = computed(() => {
+      const str = assigneeDetails.value.displayName;
+      const matches = str.match(/\b(\w)/g); // ['J','S','O','N']
+      const acronym = matches.join(""); // JSON
+      return acronym.substring(0, 2).toUpperCase();
     });
+
+    const profile = computed(() => $store.state.users.profile);
+
     const expanded = ref(false);
 
     const formattedDate = computed(() => {
@@ -215,19 +223,15 @@ export default {
         expanded.value = true;
       }
     });
-    const resetImage = () => {
-      console.log("reset image");
-      updatedImageUrl.value = "";
-    };
     return {
       numberOfPending,
-      resetImage,
       formattedDate,
       updatedImageUrl,
-      assigneeName,
-      isAdmin,
+      assigneeDetails,
+      profile,
       numberOfUrgent,
       expanded,
+      avatarInitials,
     };
   },
 };

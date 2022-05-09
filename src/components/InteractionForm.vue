@@ -1,7 +1,7 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
-    <div class="row items-center">
-      <div class="col col-12 col-md-8 q-mt-md">
+    <div class="row justify-center">
+      <div class="col col-12 q-mt-md text-center">
         <q-btn-toggle
           v-model="typeOfContact"
           class="my-custom-toggle"
@@ -50,6 +50,7 @@
       filled
       autogrow
       v-model="message"
+      :readonly="!canEditMessages"
       label="Contact Message *"
       lazy-rules
       :rules="[(val) => (val && val.length > 0) || 'Enter a contact message']"
@@ -143,6 +144,11 @@ export default {
       default: "",
     },
 
+    createdBy: {
+      type: String,
+      default: "",
+    },
+
     id: {
       type: String,
       default: null,
@@ -154,6 +160,8 @@ export default {
     const $store = useStore();
 
     const typeOfContact = ref(props.originalType);
+
+    const profile = computed(() => $store.state.users.profile);
 
     const message = ref(props.originalMessage);
 
@@ -167,6 +175,26 @@ export default {
 
     const id = ref(props.id ? true : false);
     const uid = computed(() => $store.state.users.user.uid);
+
+    const canEditMessages = computed(() => {
+      if (profile.value.admin) {
+        return true;
+      } else {
+        if (!profile.value.editMessages) {
+          if (props.createdBy != "") {
+            if (props.createdBy === profile.value.id) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      }
+    });
 
     watchEffect(() => {
       if (actioned.value) {
@@ -219,6 +247,7 @@ export default {
       actioned,
       message,
       options,
+      canEditMessages,
       urgent,
       actionTaken,
       reachOut,

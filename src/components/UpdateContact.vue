@@ -1,10 +1,22 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
-    <div class="row">
-      <q-avatar size="100px" v-if="imageUrl && isAdmin" class="q-mx-auto">
-        <img :src="imageUrl" />
-        <q-icon name="error"></q-icon>
+    <div class="row justify-center">
+      <q-avatar
+        size="100px"
+        v-if="imageUrl && profile.contactImages"
+        v-show="!imageError"
+        class="q-mx-auto"
+      >
+        <img :src="imageUrl" :onerror="resetImage" :onload="removeError" />
       </q-avatar>
+      <q-avatar
+        v-if="!imageUrl || imageError"
+        round="round"
+        color="grey"
+        size="100px"
+        icon="person"
+        text-color="white"
+      ></q-avatar>
     </div>
     <div class="row items-center">
       <div class="col col-12 col-md-5 q-mt-md q-mr-sm">
@@ -36,13 +48,19 @@
       <div class="col col-12 col-md-5 q-mt-md">
         <q-select
           filled
+          :readonly="!canEditAssignee"
           v-model="assignee"
           :options="userOptions"
           label="Assignee"
         />
       </div>
     </div>
-    <q-input filled v-model="imageUrl" label="Image URL" v-if="isAdmin" />
+    <q-input
+      filled
+      v-model="imageUrl"
+      label="Image URL"
+      v-if="profile.contactImages"
+    />
     <q-input filled v-model="email" label="Email" />
     <q-input filled v-model="fax" label="Fax" />
 
@@ -155,7 +173,7 @@ export default {
     });
 
     const userOptions = computed(() => {
-      const users = $store.state.users.profiles;
+      const users = $store.state.users.activeProfiles;
       const transformedUsers = [
         {
           label: "Unassigned",
@@ -178,11 +196,7 @@ export default {
         return (errorLoading.value = false);
       }
     };
-    const isAdmin = computed(() => {
-      const uid = $store.state.users.user.uid;
-      const profile = $store.state.users.profiles.find((p) => p.id === uid);
-      return profile.admin;
-    });
+    const profile = computed(() => $store.state.users.profile);
     const contactName = ref(props.originalName);
     const imageUrl = ref(props.originalImageUrl);
     const id = ref(props.id);
@@ -208,10 +222,26 @@ export default {
         return false;
       }
     });
+    const canEditAssignee = computed(() => {
+      if (profile.value.admin) {
+        return true;
+      } else {
+        if (!profile.value.editAssignee) {
+          if (
+            assignee.value.value == profile.value.id ||
+            assignee.value.value == ""
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return true;
+        }
+      }
+    });
     const $q = useQuasar();
     const onSubmit = async () => {
-      console.log("phone exists", phoneExists);
-      console.log("phone value", phone.value);
       context.emit("onSubmit", {
         contact: {
           contactName: contactName.value,
@@ -222,10 +252,20 @@ export default {
           redFlag: redFlag.value,
           fax: fax.value,
           lastUpdate: Date.now(),
-          imageUrl: imageUrl.value,
+          imageUrl: imageError.value ? "" : imageUrl.value,
         },
         id: id.value,
       });
+    };
+
+    const imageError = ref(true);
+
+    const resetImage = () => {
+      imageError.value = true;
+    };
+
+    const removeError = () => {
+      imageError.value = false;
     };
 
     return {
@@ -233,8 +273,12 @@ export default {
       contactName,
       imageUrl,
       fax,
-      isAdmin,
+      profile,
       phoneExists,
+      resetImage,
+      removeError,
+      imageError,
+      canEditAssignee,
       validPhone,
       updateError,
       errorLoading,

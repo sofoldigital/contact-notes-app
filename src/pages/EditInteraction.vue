@@ -8,6 +8,7 @@
             ><q-btn
               round
               color="negative"
+              v-if="profile.deleteAccess"
               icon="delete"
               @click="confirm = true"
               :loading="deleteLoading"
@@ -17,7 +18,7 @@
       </q-card-section>
       <q-item v-if="originalInteraction">
         <q-item-section top avatar>
-          <q-avatar v-if="isAdmin && contact.imageUrl != ''">
+          <q-avatar v-if="profile.contactImages && contact.imageUrl != ''">
             <img :src="contact.imageUrl" />
           </q-avatar>
           <q-avatar v-else icon="person" color="grey" class="text-white">
@@ -39,6 +40,7 @@
           :originalMessage="originalInteraction.message"
           :originalActionTaken="originalInteraction.actionTaken"
           :originalReachOut="originalInteraction.reachOut"
+          :createdBy="originalInteraction.createdBy"
           :id="originalInteraction.id"
         ></InteractionForm>
         <q-dialog v-model="confirm" persistent>
@@ -98,12 +100,7 @@ export default defineComponent({
         (c) => c.id === originalInteraction.contact
       )
     );
-    const isAdmin = computed(() => {
-      const uid = $store.state.users.user.uid;
-      const profile = $store.state.users.profiles.find((p) => p.id === uid);
-      console.log("isAdmin", profile.admin);
-      return profile.admin;
-    });
+    const profile = computed(() => $store.state.users.profile);
     const uid = computed(() => $store.state.users.user.uid);
     const confirm = ref(false);
     const deleteLoading = ref(false);
@@ -180,7 +177,7 @@ export default defineComponent({
       confirm,
       originalInteraction,
       contact,
-      isAdmin,
+      profile,
     };
   },
 });
