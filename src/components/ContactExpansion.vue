@@ -5,12 +5,13 @@
     style="border-radius: 30px"
     expand-icon-class="text-primary"
     v-model="expanded"
+    v-if="profile"
   >
     <template v-slot:header>
       <q-item dense class="full-width q-pl-none">
         <q-item-section avatar>
           <q-avatar
-            class="bg-grey"
+            class="bg-grey shadow-2"
             :size="!$q.screen.lt.sm ? '80px' : '50px'"
             @click="
               $router.push({
@@ -22,11 +23,18 @@
             "
           >
             <img
-              v-if="updatedImageUrl && isAdmin"
+              v-if="updatedImageUrl && profile.contactImages"
               :src="updatedImageUrl"
-              :onerror="resetImage"
             />
             <q-icon v-else name="person" class="text-white"></q-icon>
+            <q-badge
+              v-if="redFlag"
+              floating
+              color="negative"
+              text-color="white"
+            >
+              <q-icon name="flag" size="20px" />
+            </q-badge>
           </q-avatar>
         </q-item-section>
         <q-item-section>
@@ -41,11 +49,27 @@
           <q-item-label caption v-if="fax">
             <q-icon name="fax" class="q-mr-sm"></q-icon><span>{{ fax }}</span>
           </q-item-label>
-          <q-item-label caption>
-            <span></span>
-          </q-item-label>
+          <q-item-label class="items-center" v-if="assignee">
+            <q-chip>
+              <q-avatar v-if="assigneeDetails.imageUrl">
+                <img :src="assigneeDetails.imageUrl" />
+              </q-avatar>
+              <q-avatar
+                v-else
+                round="round"
+                color="primary"
+                text-color="white"
+                >{{ avatarInitials }}</q-avatar
+              >
+              {{ assigneeDetails.displayName }}
+            </q-chip></q-item-label
+          >
         </q-item-section>
         <q-item-section side class="text-right text-caption">
+          <q-chip color="negative" class="text-white" v-if="numberOfUrgent > 0">
+            {{ numberOfUrgent
+            }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Urgent</span>
+          </q-chip>
           <q-chip color="warning" v-if="numberOfPending > 0">
             {{ numberOfPending
             }}<span v-if="!$q.screen.lt.sm" class="q-ml-sm">Pending</span>
@@ -60,6 +84,8 @@
     </template>
     <q-card>
       <q-card-section class="q-pa-lg">
+        <q-item-label caption> Contact Notes </q-item-label>
+        <p>{{ notes }}</p>
         <ContactHistoryTable
           :contactHistory="contactHistory"
           :contactId="id"
@@ -99,6 +125,11 @@ export default {
       default: "",
     },
 
+    assignee: {
+      type: String,
+      default: "",
+    },
+
     phone: {
       type: String,
       required: true,
@@ -131,6 +162,16 @@ export default {
       type: String,
       required: true,
     },
+
+    redFlag: {
+      type: Boolean,
+      default: false,
+    },
+
+    notes: {
+      type: String,
+      default: "",
+    },
   },
   setup(props, context) {
     const updatedImageUrl = ref(props.imageUrl);
@@ -141,11 +182,36 @@ export default {
       });
       return pendingActions.length;
     });
-    const isAdmin = computed(() => {
-      const uid = $store.state.users.user.uid;
-      const profile = $store.state.users.profiles.find((p) => p.id === uid);
-      return profile.admin;
+    const numberOfUrgent = computed(() => {
+      const pendingActions = props.contactHistory.filter((x) => {
+        return x.status === "Urgent";
+      });
+      return pendingActions.length;
     });
+
+    const assigneeDetails = computed(() => {
+      const users = $store.state.users.profiles;
+      if (props.assignee != "") {
+        const user = users.find((u) => u.id === props.assignee);
+        if (user) {
+          return user;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    });
+
+    const avatarInitials = computed(() => {
+      const str = assigneeDetails.value.displayName;
+      const matches = str.match(/\b(\w)/g); // ['J','S','O','N']
+      const acronym = matches.join(""); // JSON
+      return acronym.substring(0, 2).toUpperCase();
+    });
+
+    const profile = computed(() => $store.state.users.profile);
+
     const expanded = ref(false);
 
     const formattedDate = computed(() => {
@@ -157,17 +223,15 @@ export default {
         expanded.value = true;
       }
     });
-    const resetImage = () => {
-      console.log("reset image");
-      updatedImageUrl.value = "";
-    };
     return {
       numberOfPending,
-      resetImage,
       formattedDate,
       updatedImageUrl,
-      isAdmin,
+      assigneeDetails,
+      profile,
+      numberOfUrgent,
       expanded,
+      avatarInitials,
     };
   },
 };

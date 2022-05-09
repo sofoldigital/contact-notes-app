@@ -43,13 +43,17 @@
           <q-icon
             class="q-mr-sm"
             size="20px"
-            :name="props.row.typeOfContact"
+            :name="
+              props.row.typeOfContact === 'mobile'
+                ? 'phone_android'
+                : props.row.typeOfContact
+            "
           ></q-icon>
           {{ props.row.formattedDateOfContact }}
         </q-td>
         <q-td key="createdByName" :props="props">
           <div>
-            {{ props.row.createdByName }}
+            {{ getProfileName(props.row.createdBy) }}
           </div>
         </q-td>
         <q-td key="message" :props="props">
@@ -122,7 +126,11 @@
               <q-item-section avatar>
                 <q-icon
                   class="q-mr-sm"
-                  :name="props.row.typeOfContact"
+                  :name="
+                    props.row.typeOfContact === 'mobile'
+                      ? 'phone_android'
+                      : props.row.typeOfContact
+                  "
                 ></q-icon>
               </q-item-section>
               <q-item-section>
@@ -251,7 +259,7 @@ export default {
       {
         name: "contactDate",
         required: true,
-        label: "Type / Date",
+        label: "Type/Created",
         field: "contactDate",
         align: "left",
         sortable: true,
@@ -301,6 +309,11 @@ export default {
       if (val == "Reach Out") {
         return "purple";
       } else {
+        if (val == "Actioned") {
+          return "positive";
+        } else {
+          return val === "Pending" ? "warning" : "negative";
+        }
         return val == "Actioned" ? "positive" : "warning";
       }
     };

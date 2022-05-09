@@ -47,7 +47,7 @@ export default route(function ({ store, ssrContext }) {
       (recordedRoute) => recordedRoute.meta.requiresAuth
     );
     if (user) {
-      if (to.name === "Login") {
+      if (to.name === "Login" || to.path === "/") {
         next({ name: "Home" });
       } else {
         next();

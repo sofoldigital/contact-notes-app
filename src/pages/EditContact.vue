@@ -7,6 +7,7 @@
           <q-item-section side
             ><q-btn
               round
+              v-if="profile.deleteAccess"
               color="negative"
               icon="delete"
               @click="confirm = true"
@@ -16,16 +17,31 @@
         </q-item>
       </q-card-section>
       <q-card-section>
-        <ContactForm
+        <UpdateContact
           @onSubmit="createContact"
           :loading="loading"
           :originalPhone="originalContact.phone"
           :originalName="originalContact.contactName"
           :originalFax="originalContact.fax"
+          :originalAssignee="
+            typeof originalContact.assignee === 'undefined'
+              ? ''
+              : originalContact.assignee
+          "
           :originalEmail="originalContact.email"
           :originalImageUrl="originalContact.imageUrl"
+          :originalNotes="
+            typeof originalContact.notes === 'undefined'
+              ? ''
+              : originalContact.notes
+          "
+          :originalRedFlag="
+            typeof originalContact.redFlag === 'undefined'
+              ? false
+              : originalContact.redFlag
+          "
           :id="originalContact.id"
-        ></ContactForm>
+        ></UpdateContact>
         <q-dialog v-model="confirm" persistent>
           <q-card>
             <q-card-section>
@@ -64,7 +80,7 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
-import ContactForm from "../components/ContactForm";
+import UpdateContact from "../components/UpdateContact";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -72,7 +88,7 @@ import { useQuasar } from "quasar";
 export default defineComponent({
   name: "CreateContact",
   components: {
-    ContactForm,
+    UpdateContact,
   },
   setup() {
     const $store = useStore();
@@ -83,6 +99,7 @@ export default defineComponent({
         (i) => i.id === $router.currentRoute.value.params.id
       ),
     };
+    const profile = computed(() => $store.state.users.profile);
     const confirm = ref(false);
     const loading = ref(false);
     const deleteLoading = ref(false);
@@ -127,7 +144,7 @@ export default defineComponent({
         id: $router.currentRoute.value.params.id,
         interactions: contactInteractions.value,
       };
-      console.log("payload", payload);
+
       const response = await $store.dispatch("contacts/deleteContact", payload);
       if (!response.error) {
         $q.notify({
@@ -151,6 +168,7 @@ export default defineComponent({
       createContact,
       loading,
       deleteLoading,
+      profile,
       originalContact,
       deleteContact,
       confirm,

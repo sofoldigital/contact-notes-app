@@ -1,66 +1,74 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
-    <div class="text-center">
-      <q-btn-toggle
-        v-model="typeOfContact"
-        class="my-custom-toggle"
-        no-caps
-        rounded
-        unelevated
-        toggle-color="primary"
-        color="white"
-        text-color="primary"
-        :options="options"
-      >
-        <template v-slot:call>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="call" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">Call</div>
-          </div>
-        </template>
-        <template v-slot:sms>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="sms" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">SMS</div>
-          </div>
-        </template>
-        <template v-slot:mail>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="mail" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">Email</div>
-          </div>
-        </template>
-        <template v-slot:fax>
-          <div class="row items-center no-wrap">
-            <q-icon class="q-mr-xs" name="fax" v-if="!$q.screen.lt.sm" />
-            <div class="text-center">Fax</div>
-          </div>
-        </template>
-      </q-btn-toggle>
+    <div class="row justify-center">
+      <div class="col col-12 q-mt-md text-center">
+        <q-btn-toggle
+          v-model="typeOfContact"
+          class="my-custom-toggle"
+          no-caps
+          rounded
+          unelevated
+          toggle-color="primary"
+          color="white"
+          text-color="primary"
+          :options="options"
+        >
+          <template v-slot:call>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="call" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Phone</div>
+            </div>
+          </template>
+          <template v-slot:mobile>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="phone_android" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Mobile</div>
+            </div>
+          </template>
+          <template v-slot:sms>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="sms" />
+              <div class="text-center" v-if="!$q.screen.lt.md">SMS</div>
+            </div>
+          </template>
+          <template v-slot:mail>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="mail" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Email</div>
+            </div>
+          </template>
+          <template v-slot:fax>
+            <div class="row items-center no-wrap">
+              <q-icon class="q-mr-xs" name="fax" />
+              <div class="text-center" v-if="!$q.screen.lt.md">Fax</div>
+            </div>
+          </template>
+        </q-btn-toggle>
+      </div>
     </div>
     <q-input
       filled
       autogrow
       v-model="message"
+      :readonly="!canEditMessages"
       label="Contact Message *"
       lazy-rules
       :rules="[(val) => (val && val.length > 0) || 'Enter a contact message']"
     />
     <div class="row">
-      <div class="col col-12 col-sm-6" v-if="!reachOut">
+      <div class="col col-12 col-sm-4" v-if="!reachOut">
+        <q-checkbox v-model="actioned" label="Actioned" />
+      </div>
+      <div class="col col-12 col-sm-4" v-if="!reachOut">
         <q-checkbox
-          left-label
-          v-model="actioned"
-          label="Has this been Actioned?"
+          v-model="urgent"
+          :disable="actioned"
+          color="red"
+          label="Urgent"
         />
       </div>
-      <div class="col col-12 col-sm-6">
-        <q-checkbox
-          left-label
-          v-model="reachOut"
-          color="purple"
-          label="Reach out?"
-        />
+      <div class="col col-12 col-sm-4">
+        <q-checkbox v-model="reachOut" color="purple" label="Reach out" />
       </div>
     </div>
     <q-input
@@ -70,7 +78,9 @@
       v-model="actionTaken"
       label="Action Taken *"
       lazy-rules
-      :rules="[(val) => (val !== null && val !== '') || 'Enter a contact name']"
+      :rules="[
+        (val) => (val !== null && val !== '') || 'Summarise Action Taken',
+      ]"
     />
 
     <div class="row justify-center">
@@ -78,7 +88,7 @@
         label="Save"
         class="full-width"
         type="submit"
-        color="positive"
+        color="primary"
         :loading="loading"
       />
       <q-btn
@@ -93,7 +103,7 @@
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
@@ -129,6 +139,16 @@ export default {
       default: false,
     },
 
+    originalStatus: {
+      type: String,
+      default: "",
+    },
+
+    createdBy: {
+      type: String,
+      default: "",
+    },
+
     id: {
       type: String,
       default: null,
@@ -141,27 +161,63 @@ export default {
 
     const typeOfContact = ref(props.originalType);
 
+    const profile = computed(() => $store.state.users.profile);
+
     const message = ref(props.originalMessage);
 
     const actionTaken = ref(props.originalActionTaken);
 
     const reachOut = ref(props.originalReachOut);
 
+    const urgent = ref(props.originalStatus == "Urgent" ? true : false);
+
     const actioned = ref(props.originalActioned ? true : false);
 
     const id = ref(props.id ? true : false);
     const uid = computed(() => $store.state.users.user.uid);
 
-    const onSubmit = async () => {
+    const canEditMessages = computed(() => {
+      if (profile.value.admin) {
+        return true;
+      } else {
+        if (!profile.value.editMessages) {
+          if (props.createdBy != "") {
+            if (props.createdBy === profile.value.id) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      }
+    });
+
+    watchEffect(() => {
+      if (actioned.value) {
+        urgent.value = false;
+      }
+    });
+    watchEffect(() => {
       if (reachOut.value) {
+        urgent.value = false;
         actionTaken.value = "";
         actioned.value = false;
       }
+    });
+    const onSubmit = async () => {
       const getStatus = () => {
         if (reachOut.value) {
           return "Reach Out";
         } else {
-          return actioned.value ? "Actioned" : "Pending";
+          if (actioned.value) {
+            return "Actioned";
+          } else {
+            return urgent.value ? "Urgent" : "Pending";
+          }
         }
       };
       context.emit("onSubmit", {
@@ -169,6 +225,7 @@ export default {
           typeOfContact: typeOfContact.value,
           message: message.value,
           actionTaken: actionTaken.value,
+          urgent: urgent.value,
           actioned: actioned.value,
           reachOut: reachOut.value,
           status: getStatus(),
@@ -179,6 +236,7 @@ export default {
 
     const options = ref([
       { value: "call", slot: "call" },
+      { value: "mobile", slot: "mobile" },
       { value: "sms", slot: "sms" },
       { value: "email", slot: "mail" },
       { value: "fax", slot: "fax" },
@@ -189,6 +247,8 @@ export default {
       actioned,
       message,
       options,
+      canEditMessages,
+      urgent,
       actionTaken,
       reachOut,
       onSubmit,

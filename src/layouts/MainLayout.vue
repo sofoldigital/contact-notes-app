@@ -1,17 +1,99 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh lpR fFf">
     <q-header elevated>
-      <q-toolbar v-if="isHomeView">
-        <q-toolbar-title> Contacts </q-toolbar-title>
-        <div class="text-right" v-if="profile && !$q.screen.lt.sm">
-          Logged in as {{ profile.displayName }}
-        </div>
-        <q-btn class="q-ml-md" flat @click="logOut" color="white"
-          >Logout <q-icon class="q-ml-sm" name="exit_to_app"></q-icon
-        ></q-btn>
+      <q-toolbar v-if="showToolBar">
+        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+        <q-toolbar-title> {{ title }} </q-toolbar-title>
+        <div class="text-right" v-if="profile && !$q.screen.lt.sm"></div>
       </q-toolbar>
     </q-header>
+    <q-drawer
+      v-if="showToolBar && profile"
+      :mini="miniState"
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      mini-to-overlay
+      show-if-above
+      v-model="leftDrawerOpen"
+      side="left"
+      bordered
+    >
+      <q-scroll-area class="fit">
+        <q-list padding>
+          <q-item clickable v-ripple :to="{ name: 'Home' }">
+            <q-item-section avatar>
+              <q-icon name="contacts" />
+            </q-item-section>
+            <q-item-section> Contacts </q-item-section>
+          </q-item>
 
+          <!-- <q-item>
+            <q-item-section avatar>
+              <q-icon name="event" />
+            </q-item-section>
+
+            <q-item-section> Calendar </q-item-section>
+          </q-item> -->
+
+          <q-item clickable v-ripple :to="{ name: 'Profile' }">
+            <q-item-section avatar>
+              <q-icon name="account_circle" />
+            </q-item-section>
+            <q-item-section> My Profile </q-item-section>
+          </q-item>
+          <q-item
+            clickable
+            v-ripple
+            :to="{ name: 'Management' }"
+            v-if="profile.admin"
+          >
+            <q-item-section avatar>
+              <q-icon name="manage_accounts" />
+            </q-item-section>
+            <q-item-section> Admin</q-item-section>
+          </q-item>
+        </q-list>
+        <q-item
+          clickable
+          v-ripple
+          class="q-mb-lg"
+          @click="confirmLogout = true"
+        >
+          <q-item-section avatar>
+            <q-icon name="exit_to_app" />
+          </q-item-section>
+          <q-item-section v-if="profile">
+            Logout ({{ profile.displayName }}) <span v-if="profile"></span
+          ></q-item-section>
+        </q-item>
+        <q-dialog v-model="confirmLogout" persistent>
+          <q-card>
+            <q-card-section>
+              <q-item class="row items-center">
+                <q-item-section>
+                  <span class="q-ml-sm">Are you sure you want to logout?</span>
+                </q-item-section>
+              </q-item>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="Cancel"
+                class="q-mr-md"
+                color="primary"
+                v-close-popup
+              />
+              <q-btn
+                label="Logout"
+                color="primary"
+                @click="logOut"
+                v-close-popup
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+      </q-scroll-area>
+    </q-drawer>
     <q-page-container class="bg-grey-3" v-if="loaded">
       <router-view />
     </q-page-container>
@@ -37,6 +119,8 @@ export default defineComponent({
 
   setup() {
     const $store = useStore();
+    const leftDrawerOpen = ref(false);
+    const confirmLogout = ref(false);
     const $router = useRouter();
     const profile = computed(() => {
       const profile = $store.state.users.profiles.find((profile) => {
@@ -48,16 +132,17 @@ export default defineComponent({
     $store.commit("contacts/setLoading", true);
     $store.commit("users/setLoading", true);
     $store.commit("interactions/setLoading", true);
-    $store.dispatch("contacts/fetchContacts");
+    $store.dispatch("contacts/fetchSettings");
     $store.dispatch("users/fetchProfiles");
     $store.dispatch("interactions/fetchInteractions");
+    $store.dispatch("users/updateEmail");
 
     const contactsLoading = computed(() => $store.state.contacts.loading);
     const interactionsLoading = computed(
       () => $store.state.interactions.loading
     );
     const usersLoading = computed(() => $store.state.users.loading);
-
+    const miniState = ref(true);
     const loaded = computed(
       () =>
         !usersLoading.value &&
@@ -72,13 +157,25 @@ export default defineComponent({
       await $store.dispatch("users/logUserOut");
       $router.replace({ name: "Login" });
     };
-    const isHomeView = computed(() => {
-      return $router.currentRoute.value.name === "Home";
+    const showToolBar = computed(() => {
+      const name = $router.currentRoute.value.name;
+      return name === "Home" || name === "Profile" || name === "Management";
+    });
+
+    const title = computed(() => {
+      return $router.currentRoute.value.meta.title;
     });
     return {
       profile,
+      title,
       logOut,
-      isHomeView,
+      confirmLogout,
+      showToolBar,
+      miniState,
+      leftDrawerOpen,
+      toggleLeftDrawer() {
+        leftDrawerOpen.value = !leftDrawerOpen.value;
+      },
       loaded,
     };
   },

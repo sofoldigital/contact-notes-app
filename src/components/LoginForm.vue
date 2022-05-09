@@ -24,7 +24,7 @@
         label="Login"
         class="full-width"
         type="submit"
-        color="positive"
+        color="primary"
         :loading="loading"
       />
       <!-- <reset-password-dialog /> -->

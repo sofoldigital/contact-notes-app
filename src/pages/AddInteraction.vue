@@ -6,7 +6,7 @@
       </q-card-section>
       <q-item>
         <q-item-section top avatar>
-          <q-avatar v-if="isAdmin && contact.imageUrl != ''">
+          <q-avatar v-if="profile.contactImages && contact.imageUrl != ''">
             <img :src="contact.imageUrl" />
           </q-avatar>
           <q-avatar v-else icon="person" color="grey" class="text-white">
@@ -49,22 +49,12 @@ export default defineComponent({
         (c) => c.id === $router.currentRoute.value.params.id
       )
     );
-    const isAdmin = computed(() => {
-      const uid = $store.state.users.user.uid;
-      const profile = $store.state.users.profiles.find((p) => p.id === uid);
-      console.log("isAdmin", profile.admin);
-      return profile.admin;
-    });
-    const uid = computed(() => $store.state.users.user.uid);
-    const profile = computed(() =>
-      $store.state.users.profiles.find((p) => p.id === uid.value)
-    );
+    const profile = computed(() => $store.state.users.profile);
     const loading = ref(false);
     const addInteraction = async (ev) => {
       loading.value = true;
       const { interaction } = ev;
       const currentDate = new Date().toISOString();
-      console.log("current date = ", currentDate);
       const actioned = interaction.actioned;
       interaction.contactDate = currentDate;
       interaction.dateActioned = actioned ? currentDate : "";
@@ -108,7 +98,7 @@ export default defineComponent({
       addInteraction,
       loading,
       contact,
-      isAdmin,
+      profile,
     };
   },
 });

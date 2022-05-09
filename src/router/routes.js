@@ -8,10 +8,11 @@ const routes = [
     children: [
       {
         name: "Home",
-        path: "",
+        path: "/contacts",
         component: () => import("pages/Index.vue"),
         meta: {
           requiresAuth: true,
+          title: "Contacts",
         },
       },
       {
@@ -36,6 +37,7 @@ const routes = [
         component: () => import("pages/AddInteraction.vue"),
         meta: {
           requiresAuth: true,
+          title: "Add Interaction",
         },
       },
       {
@@ -44,6 +46,25 @@ const routes = [
         component: () => import("pages/EditInteraction.vue"),
         meta: {
           requiresAuth: true,
+          title: "Edit Interaction",
+        },
+      },
+      {
+        name: "Profile",
+        path: "/profile",
+        component: () => import("pages/Profile.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "Profile",
+        },
+      },
+      {
+        name: "Management",
+        path: "/management",
+        component: () => import("src/pages/Admin.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "User Management",
         },
       },
     ],
@@ -56,6 +77,9 @@ const routes = [
         name: "Login",
         path: "",
         component: () => import("pages/Login.vue"),
+        meta: {
+          title: "Login",
+        },
       },
     ],
   },
