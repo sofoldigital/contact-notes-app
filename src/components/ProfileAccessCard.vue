@@ -25,7 +25,7 @@
             ><q-item-label>View Specific Contact</q-item-label>
             <q-item-label caption
               >Allows the user to view a contact and all their interactions if
-              they enter their phone number specifically</q-item-label
+              they enter their phone number or name specifically</q-item-label
             >
           </q-item-section>
           <q-item-section side

@@ -53,7 +53,12 @@
             <q-item-section> Admin</q-item-section>
           </q-item>
         </q-list>
-        <q-item clickable v-ripple class="q-mb-lg" @click="logOut">
+        <q-item
+          clickable
+          v-ripple
+          class="q-mb-lg"
+          @click="confirmLogout = true"
+        >
           <q-item-section avatar>
             <q-icon name="exit_to_app" />
           </q-item-section>
@@ -61,6 +66,32 @@
             Logout ({{ profile.displayName }}) <span v-if="profile"></span
           ></q-item-section>
         </q-item>
+        <q-dialog v-model="confirmLogout" persistent>
+          <q-card>
+            <q-card-section>
+              <q-item class="row items-center">
+                <q-item-section>
+                  <span class="q-ml-sm">Are you sure you want to logout?</span>
+                </q-item-section>
+              </q-item>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="Cancel"
+                class="q-mr-md"
+                color="primary"
+                v-close-popup
+              />
+              <q-btn
+                label="Logout"
+                color="primary"
+                @click="logOut"
+                v-close-popup
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </q-scroll-area>
     </q-drawer>
     <q-page-container class="bg-grey-3" v-if="loaded">
@@ -89,6 +120,7 @@ export default defineComponent({
   setup() {
     const $store = useStore();
     const leftDrawerOpen = ref(false);
+    const confirmLogout = ref(false);
     const $router = useRouter();
     const profile = computed(() => {
       const profile = $store.state.users.profiles.find((profile) => {
@@ -137,6 +169,7 @@ export default defineComponent({
       profile,
       title,
       logOut,
+      confirmLogout,
       showToolBar,
       miniState,
       leftDrawerOpen,
