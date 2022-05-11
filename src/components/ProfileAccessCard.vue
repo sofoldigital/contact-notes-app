@@ -9,7 +9,7 @@
         </q-item>
         <q-item>
           <q-item-section>
-            <q-item-label>Admin Priviledges</q-item-label>
+            <q-item-label>Admin Privileges</q-item-label>
             <q-item-label caption
               >Allows the user to perform all functions within the application
               including editing user access levels.</q-item-label
