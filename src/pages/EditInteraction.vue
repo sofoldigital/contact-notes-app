@@ -34,7 +34,7 @@
         <InteractionForm
           @onSubmit="updateInteraction"
           :loading="loading"
-          :originalType="originalInteraction.type"
+          :originalType="originalInteraction.typeOfContact"
           :originalStatus="originalInteraction.status"
           :originalActioned="originalInteraction.actioned"
           :originalMessage="originalInteraction.message"

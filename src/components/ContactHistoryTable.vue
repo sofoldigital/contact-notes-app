@@ -314,7 +314,6 @@ export default {
         } else {
           return val === "Pending" ? "warning" : "negative";
         }
-        return val == "Actioned" ? "positive" : "warning";
       }
     };
     return {

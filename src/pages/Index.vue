@@ -32,6 +32,7 @@
       <div class="col-12 col-md-3">
         <q-input
           v-model="phone"
+          outlined
           label="Phone"
           style="width: 250px; max-width: 95%"
           class="q-mx-auto q-mb-md"

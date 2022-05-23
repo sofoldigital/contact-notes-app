@@ -158,7 +158,7 @@ export default {
     const $router = useRouter();
 
     const $store = useStore();
-
+    console.log("props", props);
     const typeOfContact = ref(props.originalType);
 
     const profile = computed(() => $store.state.users.profile);
